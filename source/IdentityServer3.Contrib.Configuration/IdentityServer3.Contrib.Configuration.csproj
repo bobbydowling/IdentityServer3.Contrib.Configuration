@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2E385A43-D111-41F8-8AD2-DEB3F0568958}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IdentityServer3.Contrib.Configuration</RootNamespace>
+    <AssemblyName>IdentityServer3.Contrib.Configuration</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApplicationConfig.cs" />
+    <Compile Include="AspNetIdentityConfig.cs" />
+    <Compile Include="ClientConfig.cs" />
+    <Compile Include="ConfigHandler.cs" />
+    <Compile Include="CompanySecurityConfig.cs" />
+    <Compile Include="Enumeration\eAccessTokenType.cs" />
+    <Compile Include="Enumeration\eAuthenticationMode.cs" />
+    <Compile Include="Enumeration\eCacheType.cs" />
+    <Compile Include="Enumeration\eClaimsApplication.cs" />
+    <Compile Include="Enumeration\eCookieSecureMode.cs" />
+    <Compile Include="Enumeration\eCookieSecureOption.cs" />
+    <Compile Include="Enumeration\eFlows.cs" />
+    <Compile Include="Enumeration\eIdentityManagerSecurity.cs" />
+    <Compile Include="Enumeration\eScopeType.cs" />
+    <Compile Include="Enumeration\eTenant.cs" />
+    <Compile Include="Enumeration\eTokenExpiration.cs" />
+    <Compile Include="Enumeration\eTokenUsage.cs" />
+    <Compile Include="Enumeration\eValidationMode.cs" />
+    <Compile Include="Extension\EnumerableExtensions.cs" />
+    <Compile Include="Extension\StringExtensions.cs" />
+    <Compile Include="Extension\XPathNavigatorExtensions.cs" />
+    <Compile Include="IdentityManagerConfig.cs" />
+    <Compile Include="IdentityServerClientConfig.cs" />
+    <Compile Include="IdentityServerConfig.cs" />
+    <Compile Include="IdentityServerOptionsConfig.cs" />
+    <Compile Include="IdentityServerScopeConfig.cs" />
+    <Compile Include="IdentityServerUserConfig.cs" />
+    <Compile Include="Interface\IApplicationConfig.cs" />
+    <Compile Include="Interface\IAspNetIdentityConfig.cs" />
+    <Compile Include="Interface\IClientConfig.cs" />
+    <Compile Include="Interface\ICompanySecurityConfiguration.cs" />
+    <Compile Include="Interface\IIdentityManagerConfig.cs" />
+    <Compile Include="Interface\IIdentityServerClientConfig.cs" />
+    <Compile Include="Interface\IIdentityServerConfig.cs" />
+    <Compile Include="Interface\IIdentityServerOptionsConfig.cs" />
+    <Compile Include="Interface\IIdentityServerScopeConfig.cs" />
+    <Compile Include="Interface\IIdentityServerUserConfig.cs" />
+    <Compile Include="Interface\IServerConfig.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerConfig.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Example\Security.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
