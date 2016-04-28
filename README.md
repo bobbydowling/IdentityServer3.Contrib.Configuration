@@ -5,7 +5,7 @@ Configuration API for IdentityServer and related components
 
 The IdentityServer3 Configuration handler provides XML configuration for IdentityServer3, IdentityManager, ASP.Net Identity as well as some generic application settings.  It is meant to be a one-stop-shop for all IdentityServer-related security configuration and is quite easy to extend.
 
-Note:  This is only meant to serve as a strongly-typed, hierarchical configuration storage.  You must wire this up with the IdentityServer et al. data structures yourself.  I will update the repo with an example in time, but basicaly, instead of hard-coding your config, use this.
+Note:  This is only meant to serve as a strongly-typed, hierarchical configuration storage.  You must wire this up with the IdentityServer et al. data structures yourself.  I will update the repo with an example in time, but basically, instead of hard-coding your config, use this.
 
 ## Usage ##
 
