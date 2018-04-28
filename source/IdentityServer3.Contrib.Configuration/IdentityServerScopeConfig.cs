@@ -3,6 +3,7 @@ using System.Linq;
 using System.Xml.XPath;
 
 using IdentityServer3.Contrib.Configuration.Enumeration;
+using IdentityServer3.Contrib.Configuration.Extension;
 using IdentityServer3.Contrib.Configuration.Interface;
 
 namespace IdentityServer3.Contrib.Configuration
@@ -11,17 +12,7 @@ namespace IdentityServer3.Contrib.Configuration
 	{
 		#region Fields
 		private IScopeClaims _claims;
-		private string _claimsRule;
-		private string _description;
-		private string _displayName;
-		private bool? _emphasize;
-		private bool? _enabled;
-		private bool? _includeAllClaimsForUser;
-		private string _name;
-		private bool? _required;
 		private ISecrets _secrets;
-		private bool? _showInDiscoveryDocument;
-		private eScopeType? _scopeType;
 
 		private XPathNavigator _nav;
 		private IIdentityServerScopeConfig _template = null;
@@ -35,31 +26,17 @@ namespace IdentityServer3.Contrib.Configuration
 			_template = template;
 			_nav = iter.Current;
 
-			if (template != null)
-			{
-				_claimsRule = _template.ClaimsRule;
-				_description = _template.Description;
-				_displayName = _template.DisplayName;
-				_emphasize = _template.Emphasize;
-				_enabled = _template.Enabled;
-				_includeAllClaimsForUser = _template.IncludeAllClaimsForUser;
-				_name = _template.Name;
-				_required = _template.Required;
-				_showInDiscoveryDocument = _template.ShowInDiscoveryDocument;
-				_scopeType = _template.ScopeType;
-			}
-
-			_nav.SetString("claimsRule", ref _claimsRule);
-			_nav.SetString("description", ref _description);
-			_nav.SetString("displayName", ref _displayName);
-			_nav.SetBoolNullable("emphasize", ref _emphasize);
-			_nav.SetBoolNullable("enabled", ref _enabled);
-			_nav.SetBoolNullable("includeAllClaimsForUser", ref _includeAllClaimsForUser);
-			_nav.SetString("name", ref _name);
-			_nav.SetBoolNullable("required", ref _required);
-			_nav.SetBoolNullable("showInDiscoveryDocument", ref _showInDiscoveryDocument);
-			_nav.SetEnumNullable("type", ref _scopeType);
-		}
+            ClaimsRule = _nav.GetString(nameof(ClaimsRule), _template);
+            Description = _nav.GetString(nameof(Description), _template);
+            DisplayName = _nav.GetString(nameof(DisplayName), _template);
+            Emphasize = _nav.GetBoolNullable(nameof(Emphasize), _template);
+            Enabled = _nav.GetBoolNullable(nameof(Enabled), _template);
+            IncludeAllClaimsForUser = _nav.GetBoolNullable(nameof(IncludeAllClaimsForUser), _template);
+            Name = _nav.GetString(nameof(Name), _template);
+            Required = _nav.GetBoolNullable(nameof(Required), _template);
+            ShowInDiscoveryDocument = _nav.GetBoolNullable(nameof(ShowInDiscoveryDocument), _template);
+            Type = _nav.GetEnumNullable<eScopeType>(nameof(Type), _template);
+        }
 		#endregion
 
 		#region Properties
@@ -68,80 +45,48 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_claims == null)
-					_claims = new ScopeClaims(_nav.Select("claims"), _template != null ? _template.Claims : null);
+					_claims = new ScopeClaims(_nav.Select(nameof(Claims).ToLowerFirstLetter()), _template != null ? _template.Claims : null);
 
 				return _claims;
 			}
 		}
 
-		public string ClaimsRule
-		{
-			get { return _claimsRule; }
-		}
+		public string ClaimsRule { get; private set; }
 
-		public string Description
-		{
-			get { return _description; }
-		}
+        public string Description { get; private set; }
 
-		public string DisplayName
-		{
-			get { return _displayName; }
-		}
+        public string DisplayName { get; private set; }
 
-		public bool? Emphasize
-		{
-			get { return _emphasize; }
-		}
+        public bool? Emphasize { get; private set; }
 
-		public bool? Enabled
-		{
-			get { return _enabled; }
-		}
+        public bool? Enabled { get; private set; }
 
-		public bool? IncludeAllClaimsForUser
-		{
-			get { return _includeAllClaimsForUser; }
-		}
+        public bool? IncludeAllClaimsForUser { get; private set; }
 
-		public string Name
-		{
-			get { return _name; }
-		}
+        public string Name { get; private set; }
 
-		public bool? Required
-		{
-			get { return _required; }
-		}
+        public bool? Required { get; private set; }
 
-		public ISecrets Secrets
+        public ISecrets Secrets
 		{
 			get
 			{
 				if (_secrets == null)
-					_secrets = new Secrets(_nav.Select("secrets"), _template != null ? _template.Secrets : null);
+					_secrets = new Secrets(_nav.Select(nameof(Secrets).ToLowerFirstLetter()), _template != null ? _template.Secrets : null);
 
 				return _secrets;
 			}
 		}
 
-		public bool? ShowInDiscoveryDocument
-		{
-			get { return _showInDiscoveryDocument; }
-		}
+		public bool? ShowInDiscoveryDocument { get; private set; }
 
-		public eScopeType? ScopeType
-		{
-			get { return _scopeType; }
-		}
-		#endregion
+        public eScopeType? Type { get; private set; }
+        #endregion
 
-		#region Public Methods
-		public static string GetName(XPathNavigator nav)
+        #region Public Methods
+        public static string GetName(XPathNavigator nav)
 		{
-			var returnValue = string.Empty;
-			nav.SetString("name", ref returnValue);
-			return returnValue;
+            return nav.GetString(nameof(Name));
 		}
 		#endregion
 
@@ -151,12 +96,12 @@ namespace IdentityServer3.Contrib.Configuration
 			if (!IdentityServerConfig.IsLoadKnownDefaults)
 				return;
 
-			_emphasize = false;
-			_enabled = true;
-			_includeAllClaimsForUser = false;
-			_required = false;
-			_showInDiscoveryDocument = true;
-			_scopeType = eScopeType.Resource;
+			Emphasize = false;
+			Enabled = true;
+			IncludeAllClaimsForUser = false;
+			Required = false;
+			ShowInDiscoveryDocument = true;
+			Type = eScopeType.Resource;
 		}
 		#endregion
 	}
@@ -196,12 +141,6 @@ namespace IdentityServer3.Contrib.Configuration
 
 	public class ScopeClaim : IScopeClaim
 	{
-		#region Fields
-		private bool? _alwaysIncludeInIdToken;
-		private string _description;
-		private string _name;
-		#endregion
-
 		#region Constructors
 		public ScopeClaim(XPathNodeIterator iter, IScopeClaim template)
 		{
@@ -209,43 +148,24 @@ namespace IdentityServer3.Contrib.Configuration
 
 			var nav = iter.Current;
 
-			if (template != null)
-			{
-				_alwaysIncludeInIdToken = template.AlwaysIncludeInIdToken;
-				_description = template.Description;
-				_name = template.Name;
-			}
-
-			nav.SetBoolNullable("alwaysIncludeInIdToken", ref _alwaysIncludeInIdToken);
-			nav.SetString("description", ref _description);
-			nav.SetString("name", ref _name);
-		}
+            AlwaysIncludeInIdToken = nav.GetBoolNullable(nameof(AlwaysIncludeInIdToken), template);
+            Description = nav.GetString(nameof(Description), template);
+            Name = nav.GetString(nameof(Name), template);
+        }
 		#endregion
 
 		#region Properties
-		public bool? AlwaysIncludeInIdToken
-		{
-			get { return _alwaysIncludeInIdToken; }
-		}
+		public bool? AlwaysIncludeInIdToken { get; private set; }
 
-		public string Description
-		{
-			get { return _description; }
-		}
+        public string Description { get; private set; }
 
-		public string Name
-		{
-			get { return _name; }
-		}
+        public string Name { get; private set; }
+        #endregion
 
-		#endregion
-
-		#region Public Methods
-		public static string GetName(XPathNavigator nav)
+        #region Public Methods
+        public static string GetName(XPathNavigator nav)
 		{
-			var returnValue = string.Empty;
-			nav.SetString("name", ref returnValue);
-			return returnValue;
+            return nav.GetString(nameof(Name));
 		}
 		#endregion
 
@@ -255,7 +175,7 @@ namespace IdentityServer3.Contrib.Configuration
 			if (!IdentityServerConfig.IsLoadKnownDefaults)
 				return;
 
-			_alwaysIncludeInIdToken = false;
+			AlwaysIncludeInIdToken = false;
 		}
 		#endregion
 	}

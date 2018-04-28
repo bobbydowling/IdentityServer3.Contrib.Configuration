@@ -5,1542 +5,962 @@ using System.Security.Cryptography.X509Certificates;
 using System.Xml.XPath;
 
 using IdentityServer3.Contrib.Configuration.Enumeration;
+using IdentityServer3.Contrib.Configuration.Extension;
 using IdentityServer3.Contrib.Configuration.Interface;
 
 namespace IdentityServer3.Contrib.Configuration
 {
-	public class IdentityServerOptionsConfig : IIdentityServerOptionsConfig
-	{
-		#region Fields
-		private IAuthentication _authentication;
-		private ICaching _caching;
-		private ICertificate _certificate;
-		private ICors _cors;
-		private ICsp _csp;
-		private bool? _enableWelcomePage;
-		private IEndPoints _endPoints;
-		private IEvents _events;
-		private IInputLengthRestrictions _inputLengthRestrictions;
-		private string _issuerUri;
-		private ILogging _logging;
-		private IOperationalData _operationalData;
-		private List<string> _protocolLogoutUrls;
-		private string _publicOrigin;
-		private bool? _requireSsl;
-		private string _siteName;
-		private ITenants _tenants;
-
-		private XPathNavigator _nav;
-		private IIdentityServerOptionsConfig _template = null;
-		#endregion
-
-		#region Constructors
-		public IdentityServerOptionsConfig(XPathNodeIterator iter, IIdentityServerOptionsConfig template)
-		{
-			SetKnownDefaults();
-
-			_template = template;
-
-			if (_template != null)
-			{
-				_enableWelcomePage = _template.EnableWelcomePage;
-				_issuerUri = _template.IssuerUri;
-				_protocolLogoutUrls = _template.ProtocolLogoutUrls;
-				_publicOrigin = _template.PublicOrigin;
-				_requireSsl = _template.RequireSsl;
-				_siteName = _template.SiteName;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetBoolNullable("enableWelcomePage", ref _enableWelcomePage);
-				_nav.SetString("issuerUri", ref _issuerUri);
-				_nav.SetListString("protocolLogoutUrls", ref _protocolLogoutUrls);
-				_nav.SetString("publicOrigin", ref _publicOrigin);
-				_nav.SetBoolNullable("requireSsl", ref _requireSsl);
-				_nav.SetString("siteName", ref _siteName);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public IAuthentication Authentication
-		{
-			get
-			{
-				if (_authentication == null)
-					_authentication = new Authentication(_nav.Select("authentication"), _template != null ? _template.Authentication : null);
-
-				return _authentication;
-			}
-		}
-
-		public ICaching Caching
-		{
-			get
-			{
-				if (_caching == null)
-					_caching = new Caching(_nav.Select("caching"), _template != null ? _template.Caching : null);
-
-				return _caching;
-			}
-		}
-
-		public ICertificate Certificate
-		{
-			get
-			{
-				if (_certificate == null)
-					_certificate = new Certificate(_nav.Select("certificate"), _template != null ? _template.Certificate : null);
-
-				return _certificate;
-			}
-		}
-
-		public ICors Cors
-		{
-			get
-			{
-				if (_cors == null)
-					_cors = new Cors(_nav.Select("cors"), _template != null ? _template.Cors : null);
-
-				return _cors;
-			}
-		}
-
-		public ICsp Csp
-		{
-			get
-			{
-				if (_csp == null)
-					_csp = new Csp(_nav.Select("csp"), _template != null ? _template.Csp : null);
-
-				return _csp;
-			}
-		}
-
-		public bool? EnableWelcomePage
-		{
-			get { return _enableWelcomePage; }
-		}
-
-		public IEndPoints EndPoints
-		{
-			get
-			{
-				if (_endPoints == null)
-					_endPoints = new EndPoints(_nav.Select("endPoints"), _template != null ? _template.EndPoints : null);
-
-				return _endPoints;
-			}
-		}
-
-		public IEvents Events
-		{
-			get
-			{
-				if (_events == null)
-					_events = new Events(_nav.Select("events"), _template != null ? _template.Events : null);
-
-				return _events;
-			}
-		}
-
-		public IInputLengthRestrictions InputLengthRestrictions
-		{
-			get
-			{
-				if (_inputLengthRestrictions == null)
-					_inputLengthRestrictions = new InputLengthRestrictions(_nav.Select("inputLengthRestrictions"), _template != null ? _template.InputLengthRestrictions : null);
-
-				return _inputLengthRestrictions;
-			}
-		}
-
-		public string IssuerUri
-		{
-			get { return _issuerUri; }
-		}
-
-		public ILogging Logging
-		{
-			get
-			{
-				if (_logging == null)
-					_logging = new Logging(_nav.Select("logging"), _template != null ? _template.Logging : null);
-
-				return _logging;
-			}
-		}
-
-		public IOperationalData OperationalData
-		{
-			get
-			{
-				if (_operationalData == null)
-					_operationalData = new OperationalData(_nav.Select("operationalData"), _template != null ? _template.OperationalData : null);
-
-				return _operationalData;
-			}
-		}
-
-		public List<string> ProtocolLogoutUrls
-		{
-			get { return _protocolLogoutUrls; }
-		}
-
-		public string PublicOrigin
-		{
-			get { return _publicOrigin; }
-		}
-
-		public bool? RequireSsl
-		{
-			get { return _requireSsl; }
-		}
-
-		public string SiteName
-		{
-			get { return _siteName; }
-		}
-
-		public ITenants Tenants
-		{
-			get
-			{
-				if (_tenants == null)
-					_tenants = new Tenants(_nav.Select("tenants"), _template != null ? _template.Tenants : null);
-
-				return _tenants;
-			}
-		}
-		#endregion
-
-		#region Private Methods
-		private void SetKnownDefaults()
-		{
-			if (!IdentityServerConfig.IsLoadKnownDefaults)
-				return;
-
-			_enableWelcomePage = true;
-			_requireSsl = true;
-		}
-		#endregion
-	}
-
-	public class Authentication : IAuthentication
-	{
-		#region Fields
-		private ICookie _cookie;
-		private bool? _enableLoginHint;
-		private bool? _enableLocalLogin;
-		private bool? _enablePostSignOutAutoRedirect;
-		private bool? _enableSignOutPrompt;
-		private string _invalidSignInRedirectUrl;
-		private ILoginPageLinks _loginPageLinks;
-		private int? _postSignOutAutoRedirectDelay;
-		private bool? _rememberLastUsername;
-		private bool? _requireAuthenticatedUserForSignOutMessage;
-		private int? _signInMessageThreshold;
-		private bool _isEnableExternalWindowsAuthentication;
-		private string _externalWindowsAuthenticationCaption;
-		private string _resetPasswordRedirectUri;
-		private string _resetPasswordUri;
-
-		private XPathNavigator _nav;
-		private IAuthentication _template = null;
-		#endregion
-
-		#region Constructors
-		public Authentication(XPathNodeIterator iter, IAuthentication template)
-		{
-			SetKnownDefaults();
-
-			_template = template;
-
-			if (_template != null)
-			{
-				_enableLoginHint = _template.EnableLoginHint;
-				_enableLocalLogin = _template.EnableLocalLogin;
-				_enablePostSignOutAutoRedirect = _template.EnablePostSignOutAutoRedirect;
-				_enableSignOutPrompt = _template.EnableSignOutPrompt;
-				_invalidSignInRedirectUrl = _template.InvalidSignInRedirectUrl;
-				_postSignOutAutoRedirectDelay = _template.PostSignOutAutoRedirectDelay;
-				_rememberLastUsername = _template.RememberLastUsername;
-				_requireAuthenticatedUserForSignOutMessage = _template.RequireAuthenticatedUserForSignOutMessage;
-				_signInMessageThreshold = _template.SignInMessageThreshold;
-				_isEnableExternalWindowsAuthentication = _template.IsEnableExternalWindowsAuthentication;
-				_externalWindowsAuthenticationCaption = _template.ExternalWindowsAuthenticationCaption;
-				_resetPasswordRedirectUri = _template.ResetPasswordRedirectUri;
-				_resetPasswordUri = _template.ResetPasswordUri;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetBoolNullable("enableLoginHint", ref _enableLoginHint);
-				_nav.SetBoolNullable("enableLocalLogin", ref _enableLocalLogin);
-				_nav.SetBoolNullable("enablePostSignOutAutoRedirect", ref _enablePostSignOutAutoRedirect);
-				_nav.SetBoolNullable("enableSignOutPrompt", ref _enableSignOutPrompt);
-				_nav.SetString("invalidSignInRedirectUrl", ref _invalidSignInRedirectUrl);
-				_nav.SetIntNullable("postSignOutAutoRedirectDelay", ref _postSignOutAutoRedirectDelay);
-				_nav.SetBoolNullable("rememberLastUsername", ref _rememberLastUsername);
-				_nav.SetBoolNullable("requireAuthenticatedUserForSignOutMessage", ref _requireAuthenticatedUserForSignOutMessage);
-				_nav.SetIntNullable("signInMessageThreshold", ref _signInMessageThreshold);
-				_nav.SetBool("isEnableExternalWindowsAuthentication", ref _isEnableExternalWindowsAuthentication);
-				_nav.SetString("externalWindowsAuthenticationCaption", ref _externalWindowsAuthenticationCaption);
-				_nav.SetString("resetPasswordRedirectUri", ref _resetPasswordRedirectUri);
-				_nav.SetString("resetPasswordUri", ref _resetPasswordUri);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public ICookie Cookie
-		{
-			get
-			{
-				if (_cookie == null)
-					_cookie = new Cookie(_nav.Select("cookie"), _template != null ? _template.Cookie : null);
-
-				return _cookie;
-			}
-		}
-
-		public bool? EnableLoginHint
-		{
-			get { return _enableLoginHint; }
-		}
-
-		public bool? EnableLocalLogin
-		{
-			get { return _enableLocalLogin; }
-		}
-
-		public bool? EnablePostSignOutAutoRedirect
-		{
-			get { return _enablePostSignOutAutoRedirect; }
-		}
-
-		public bool? EnableSignOutPrompt
-		{
-			get { return _enableSignOutPrompt; }
-		}
-
-		public string InvalidSignInRedirectUrl
-		{
-			get { return _invalidSignInRedirectUrl; }
-		}
-
-		public ILoginPageLinks LoginPageLinks
-		{
-			get
-			{
-				if (_loginPageLinks == null)
-					_loginPageLinks = new LoginPageLinks(_nav.Select("loginPageLinks"), _template != null ? _template.LoginPageLinks : null);
-
-				return _loginPageLinks;
-			}
-		}
-
-		public int? PostSignOutAutoRedirectDelay
-		{
-			get { return _postSignOutAutoRedirectDelay; }
-		}
-
-		public bool? RememberLastUsername
-		{
-			get { return _rememberLastUsername; }
-		}
-
-		public bool? RequireAuthenticatedUserForSignOutMessage
-		{
-			get { return _requireAuthenticatedUserForSignOutMessage; }
-		}
-
-		public int? SignInMessageThreshold
-		{
-			get { return _signInMessageThreshold; }
-		}
-
-		public bool IsEnableExternalWindowsAuthentication
-		{
-			get { return _isEnableExternalWindowsAuthentication; }
-		}
-
-		public string ExternalWindowsAuthenticationCaption
-		{
-			get { return _externalWindowsAuthenticationCaption; }
-		}
-
-		public string ResetPasswordRedirectUri
-		{
-			get { return _resetPasswordRedirectUri; }
-		}
-
-		public string ResetPasswordUri
-		{
-			get { return _resetPasswordUri; }
-		}
-		#endregion
-
-		#region Private Methods
-		private void SetKnownDefaults()
-		{
-			if (!IdentityServerConfig.IsLoadKnownDefaults)
-				return;
-
-			_enableLoginHint = true;
-			_enableLocalLogin = true;
-			_enablePostSignOutAutoRedirect = false;
-			_enableSignOutPrompt = true;
-			_postSignOutAutoRedirectDelay = 0;
-			_rememberLastUsername = false;
-			_requireAuthenticatedUserForSignOutMessage = false;
-			_signInMessageThreshold = 5;
-		}
-		#endregion
-	}
-
-	public class Cookie : ICookie
-	{
-		#region Fields
-		private bool? _allowRememberMe;
-		private TimeSpan? _expireTimeSpan;
-		private bool? _isPersistent;
-		private string _path;
-		private string _prefix;
-		private TimeSpan? _rememberMeDuration;
-		private eCookieSecureMode? _secureMode;
-		private bool? _slidingExpiration;
-
-		private XPathNavigator _nav;
-		private ICookie _template = null;
-		#endregion
-
-		#region Constructors
-		public Cookie(XPathNodeIterator iter, ICookie template)
-		{
-			SetKnownDefaults();
-
-			_template = template;
-
-			if (_template != null)
-			{
-				_allowRememberMe = _template.AllowRememberMe;
-				_expireTimeSpan = _template.ExpireTimeSpan;
-				_isPersistent = _template.IsPersistent;
-				_path = _template.Path;
-				_prefix = _template.Prefix;
-				_rememberMeDuration = _template.RememberMeDuration;
-				_secureMode = _template.SecureMode;
-				_slidingExpiration = _template.SlidingExpiration;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetBoolNullable("allowRememberMe", ref _allowRememberMe);
-				_nav.SetTimeSpanNullable("expireTimeSpan", ref _expireTimeSpan);
-				_nav.SetBoolNullable("isPersistent", ref _isPersistent);
-				_nav.SetString("path", ref _path);
-				_nav.SetString("prefix", ref _prefix);
-				_nav.SetTimeSpanNullable("rememberMeDuration", ref _rememberMeDuration);
-				_nav.SetEnumNullable("secureMode", ref _secureMode);
-				_nav.SetBoolNullable("slidingExpiration", ref _slidingExpiration);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public bool? AllowRememberMe
-		{
-			get { return _allowRememberMe; }
-		}
-
-		public TimeSpan? ExpireTimeSpan
-		{
-			get { return _expireTimeSpan; }
-		}
-
-		public bool? IsPersistent
-		{
-			get { return _isPersistent; }
-		}
-
-		public string Path
-		{
-			get { return _path; }
-		}
-
-		public string Prefix
-		{
-			get { return _prefix; }
-		}
-
-		public TimeSpan? RememberMeDuration
-		{
-			get { return _rememberMeDuration; }
-		}
-
-		public eCookieSecureMode? SecureMode
-		{
-			get { return _secureMode; }
-		}
-
-		public bool? SlidingExpiration
-		{
-			get { return _slidingExpiration; }
-		}
-		#endregion
-
-		#region Private Methods
-		private void SetKnownDefaults()
-		{
-			if (!IdentityServerConfig.IsLoadKnownDefaults)
-				return;
-
-			_allowRememberMe = true;
-			_expireTimeSpan = TimeSpan.FromHours(10);
-			_isPersistent = false;
-			_rememberMeDuration = TimeSpan.FromDays(30);
-			_secureMode = eCookieSecureMode.SameAsRequest;
-			_slidingExpiration = false;
-		}
-		#endregion
-	}
-
-	public class LoginPageLinks : List<ILoginPageLink>, ILoginPageLinks
-	{
-		#region Constructors
-		public LoginPageLinks(XPathNodeIterator iter, ILoginPageLinks template)
-		{
-			if (template != null)
-				template.Each(l => Add(l));
-
-			if (iter.MoveNext())
-				Initialize(iter);
-		}
-		#endregion
-
-		#region Private Methods
-		public void Initialize(XPathNodeIterator iter)
-		{
-			iter = iter.Current.Select("link");
-
-			while (iter.MoveNext())
-			{
-				var href = LoginPageLink.GetHref(iter.Current);
-				var template = this.SingleOrDefault(l => l.Href == href);
-
-				if (template != null)
-					Remove(template);
-
-				var newValue = new LoginPageLink(iter, template);
-				Add(newValue);
-			}
-		}
-		#endregion
-	}
-
-	public class LoginPageLink : ILoginPageLink
-	{
-		#region Fields
-		private string _href;
-		private string _text;
-		private string _type;
-		#endregion
-
-		#region Constructors
-		public LoginPageLink(XPathNodeIterator iter, ILoginPageLink template)
-		{
-			var nav = iter.Current;
-
-			if (template != null)
-			{
-				_href = template.Href;
-				_text = template.Text;
-				_type = template.Type;
-			}
-
-			nav.SetString("href", ref _href);
-			nav.SetString("text", ref _text);
-			nav.SetString("type", ref _type);
-		}
-		#endregion
-
-		#region Properties
-		public string Href
-		{
-			get { return _href; }
-		}
-
-		public string Text
-		{
-			get { return _text; }
-		}
-
-		public string Type
-		{
-			get { return _type; }
-		}
-		#endregion
-
-		#region Public Methods
-		public static string GetHref(XPathNavigator nav)
-		{
-			var returnValue = string.Empty;
-			nav.SetString("href", ref returnValue);
-			return returnValue;
-		}
-		#endregion
-	}
-
-	public class Caching : ICaching
-	{
-		#region Fields
-		private bool _isEnabledClients;
-		private bool _isEnabledScopes;
-		private bool _isEnabledUsers;
-		private bool _isUseInMemoryStore;
-		private eCacheType _customType;
-		private TimeSpan _clientExpiry;
-		private TimeSpan _scopeExpiry;
-		private TimeSpan _userExpiry;
-		private TimeSpan _usersExpiry;
-
-		private XPathNavigator _nav;
-		private ICaching _template = null;
-		#endregion
-
-		#region Constructors
-		public Caching(XPathNodeIterator iter, ICaching template)
-		{
-			_template = template;
-
-			if (_template != null)
-			{
-				_isEnabledClients = _template.IsEnabledClients;
-				_isEnabledScopes = _template.IsEnabledScopes;
-				_isEnabledUsers = _template.IsEnabledUsers;
-				_isUseInMemoryStore = _template.IsUseInMemoryStore;
-				_customType = _template.CustomType;
-				_clientExpiry = _template.ClientExpiry;
-				_scopeExpiry = _template.ScopeExpiry;
-				_userExpiry = _template.UserExpiry;
-				_usersExpiry = _template.UsersExpiry;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetBool("isEnabledClients", ref _isEnabledClients);
-				_nav.SetBool("isEnabledScopes", ref _isEnabledScopes);
-				_nav.SetBool("isEnabledUsers", ref _isEnabledUsers);
-				_nav.SetBool("isUseInMemoryStore", ref _isUseInMemoryStore);
-				_nav.SetEnum("customType", ref _customType);
-				_nav.SetTimeSpan("clientExpiry", ref _clientExpiry);
-				_nav.SetTimeSpan("scopeExpiry", ref _scopeExpiry);
-				_nav.SetTimeSpan("userExpiry", ref _userExpiry);
-				_nav.SetTimeSpan("usersExpiry", ref _usersExpiry);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public bool IsEnabledClients
-		{
-			get { return _isEnabledClients; }
-		}
-
-		public bool IsEnabledScopes
-		{
-			get { return _isEnabledScopes; }
-		}
-
-		public bool IsEnabledUsers
-		{
-			get { return _isEnabledUsers; }
-		}
-
-		public bool IsUseInMemoryStore
-		{
-			get { return _isUseInMemoryStore; }
-		}
-
-		public eCacheType CustomType
-		{
-			get { return _customType; }
-		}
-
-		public TimeSpan ClientExpiry
-		{
-			get { return _clientExpiry; }
-		}
-
-		public TimeSpan ScopeExpiry
-		{
-			get { return _scopeExpiry; }
-		}
-
-		public TimeSpan UserExpiry
-		{
-			get { return _userExpiry; }
-		}
-
-		public TimeSpan UsersExpiry
-		{
-			get { return _usersExpiry; }
-		}
-		#endregion
-	}
-
-	public class Certificate : ICertificate
-	{
-		#region Fields
-		private string _name;
-		private StoreName _storeName;
-		private StoreLocation _storeLocation;
-		private string _fileName;
-		private string _password;
-		private X509KeyStorageFlags? _storageFlags;
-
-		private XPathNavigator _nav;
-		private ICertificate _template = null;
-		#endregion
-
-		#region Constructors
-		public Certificate(XPathNodeIterator iter, ICertificate template)
-		{
-			SetKnownDefaults();
-
-			_template = template;
-
-			if (_template != null)
-			{
-				_name = template.Name;
-				_storeName = template.StoreName;
-				_storeLocation = template.StoreLocation;
-				_fileName = template.FileName;
-				_password = template.Password;
-				_storageFlags = template.StorageFlags;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetString("name", ref _name);
-				_nav.SetEnum("storeName", ref _storeName);
-				_nav.SetEnum("storeLocation", ref _storeLocation);
-				_nav.SetString("fileName", ref _fileName);
-				_nav.SetString("password", ref _password);
-				_nav.SetFlagsNullable("storageFlags", ref _storageFlags);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public string Name
-		{
-			get { return _name; }
-		}
-
-		public StoreName StoreName
-		{
-			get { return _storeName; }
-		}
-
-		public StoreLocation StoreLocation
-		{
-			get { return _storeLocation; }
-		}
-
-		public string FileName
-		{
-			get { return _fileName; }
-		}
-
-		public string Password
-		{
-			get { return _password; }
-		}
-
-		public X509KeyStorageFlags? StorageFlags
-		{
-			get { return _storageFlags; }
-		}
-		#endregion
-
-		#region Private Methods
-		private void SetKnownDefaults()
-		{
-			if (!IdentityServerConfig.IsLoadKnownDefaults)
-				return;
-
-			_storageFlags = X509KeyStorageFlags.UserKeySet;
-		}
-		#endregion
-	}
-
-	public class Cors : ICors
-	{
-		#region Fields
-		private bool _isUseInMemoryStore;
-		private bool _allowAllCustom;
-		private List<string> _allowedOriginsCustom;
-
-		private XPathNavigator _nav;
-		private ICors _template = null;
-		#endregion
-
-		#region Constructors
-		public Cors(XPathNodeIterator iter, ICors template)
-		{
-			SetKnownDefaults();
-
-			_template = template;
-
-			if (_template != null)
-			{
-				_isUseInMemoryStore = _template.IsUseInMemoryStore;
-				_allowAllCustom = _template.AllowAllCustom;
-				_allowedOriginsCustom = _template.AllowedOriginsCustom;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetBool("isUseInMemoryStore", ref _isUseInMemoryStore);
-				_nav.SetBool("allowAllCustom", ref _allowAllCustom);
-				_nav.SetListString("allowedOriginsCustom", ref _allowedOriginsCustom);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public bool IsUseInMemoryStore
-		{
-			get { return _isUseInMemoryStore; }
-		}
-
-		public bool AllowAllCustom
-		{
-			get { return _allowAllCustom; }
-		}
-
-		public List<string> AllowedOriginsCustom
-		{
-			get { return _allowedOriginsCustom; }
-		}
-		#endregion
-
-		#region Private Methods
-		private void SetKnownDefaults()
-		{
-			if (!IdentityServerConfig.IsLoadKnownDefaults)
-				return;
-		}
-		#endregion
-	}
-
-	public class Csp : ICsp
-	{
-		#region Fields
-		private string _connectSource;
-		private bool? _enabled;
-		private string _fontSource;
-		private string _imageSource;
-		private string _scriptSource;
-		private string _styleSource;
-
-		private XPathNavigator _nav;
-		private ICsp _template = null;
-		#endregion
-
-		#region Constructors
-		public Csp(XPathNodeIterator iter, ICsp template)
-		{
-			SetKnownDefaults();
-
-			_template = template;
-
-			if (_template != null)
-			{
-				_connectSource = template.ConnectSource;
-				_enabled = template.Enabled;
-				_fontSource = template.FontSource;
-				_imageSource = template.ImageSource;
-				_scriptSource = template.ScriptSource;
-				_styleSource = template.StyleSource;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetString("connectSource", ref _connectSource);
-				_nav.SetBoolNullable("enabled", ref _enabled);
-				_nav.SetString("fontSource", ref _fontSource);
-				_nav.SetString("imageSource", ref _imageSource);
-				_nav.SetString("scriptSource", ref _scriptSource);
-				_nav.SetString("styleSource", ref _styleSource);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public string ConnectSource
-		{
-			get { return _connectSource; }
-		}
-
-		public bool? Enabled
-		{
-			get { return _enabled; }
-		}
-
-		public string FontSource
-		{
-			get { return _fontSource; }
-		}
-
-		public string ImageSource
-		{
-			get { return _imageSource; }
-		}
-
-		public string ScriptSource
-		{
-			get { return _scriptSource; }
-		}
-
-		public string StyleSource
-		{
-			get { return _styleSource; }
-		}
-		#endregion
-
-		#region Private Methods
-		private void SetKnownDefaults()
-		{
-			if (!IdentityServerConfig.IsLoadKnownDefaults)
-				return;
-
-			_enabled = true;
-		}
-		#endregion
-	}
-
-	public class EndPoints : IEndPoints
-	{
-		#region Fields
-		private bool? _enableAuthorizeEndpoint;
-		private bool? _enableTokenEndpoint;
-		private bool? _enableUserInfoEndpoint;
-		private bool? _enableDiscoveryEndpoint;
-		private bool? _enableAccessTokenValidationEndpoint;
-		private bool? _enableIdentityTokenValidationEndpoint;
-		private bool? _enableEndSessionEndpoint;
-		private bool? _enableClientPermissionsEndpoint;
-		private bool? _enableCspReportEndpoint;
-		private bool? _enableCheckSessionEndpoint;
-		private bool? _enableTokenRevocationEndpoint;
-		private bool? _enableIntrospectionEndpoint;
-
-		private XPathNavigator _nav;
-		private IEndPoints _template = null;
-		#endregion
-
-		#region Constructors
-		public EndPoints(XPathNodeIterator iter, IEndPoints template)
-		{
-			SetKnownDefaults();
-
-			_template = template;
-
-			if (_template != null)
-			{
-				_enableAuthorizeEndpoint = template.EnableAuthorizeEndpoint;
-				_enableTokenEndpoint = template.EnableTokenEndpoint;
-				_enableUserInfoEndpoint = template.EnableUserInfoEndpoint;
-				_enableDiscoveryEndpoint = template.EnableDiscoveryEndpoint;
-				_enableAccessTokenValidationEndpoint = template.EnableAccessTokenValidationEndpoint;
-				_enableIdentityTokenValidationEndpoint = template.EnableIdentityTokenValidationEndpoint;
-				_enableEndSessionEndpoint = template.EnableEndSessionEndpoint;
-				_enableClientPermissionsEndpoint = template.EnableClientPermissionsEndpoint;
-				_enableCspReportEndpoint = template.EnableCspReportEndpoint;
-				_enableCheckSessionEndpoint = template.EnableCheckSessionEndpoint;
-				_enableTokenRevocationEndpoint = template.EnableTokenRevocationEndpoint;
-				_enableIntrospectionEndpoint = template.EnableIntrospectionEndpoint;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetBoolNullable("enableAuthorizeEndpoint", ref _enableAuthorizeEndpoint);
-				_nav.SetBoolNullable("enableTokenEndpoint", ref _enableTokenEndpoint);
-				_nav.SetBoolNullable("enableUserInfoEndpoint", ref _enableUserInfoEndpoint);
-				_nav.SetBoolNullable("enableDiscoveryEndpoint", ref _enableDiscoveryEndpoint);
-				_nav.SetBoolNullable("enableAccessTokenValidationEndpoint", ref _enableAccessTokenValidationEndpoint);
-				_nav.SetBoolNullable("enableIdentityTokenValidationEndpoint", ref _enableIdentityTokenValidationEndpoint);
-				_nav.SetBoolNullable("enableEndSessionEndpoint", ref _enableEndSessionEndpoint);
-				_nav.SetBoolNullable("enableClientPermissionsEndpoint", ref _enableClientPermissionsEndpoint);
-				_nav.SetBoolNullable("enableCspReportEndpoint", ref _enableCspReportEndpoint);
-				_nav.SetBoolNullable("enableCheckSessionEndpoint", ref _enableCheckSessionEndpoint);
-				_nav.SetBoolNullable("enableTokenRevocationEndpoint", ref _enableTokenRevocationEndpoint);
-				_nav.SetBoolNullable("enableIntrospectionEndpoint", ref _enableIntrospectionEndpoint);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public bool? EnableAuthorizeEndpoint
-		{
-			get { return _enableAuthorizeEndpoint; }
-		}
-
-		public bool? EnableTokenEndpoint
-		{
-			get { return _enableTokenEndpoint; }
-		}
-
-		public bool? EnableUserInfoEndpoint
-		{
-			get { return _enableUserInfoEndpoint; }
-		}
-
-		public bool? EnableDiscoveryEndpoint
-		{
-			get { return _enableDiscoveryEndpoint; }
-		}
-
-		public bool? EnableAccessTokenValidationEndpoint
-		{
-			get { return _enableAccessTokenValidationEndpoint; }
-		}
-
-		public bool? EnableIdentityTokenValidationEndpoint
-		{
-			get { return _enableIdentityTokenValidationEndpoint; }
-		}
-
-		public bool? EnableEndSessionEndpoint
-		{
-			get { return _enableEndSessionEndpoint; }
-		}
-
-		public bool? EnableClientPermissionsEndpoint
-		{
-			get { return _enableClientPermissionsEndpoint; }
-		}
-
-		public bool? EnableCspReportEndpoint
-		{
-			get { return _enableCspReportEndpoint; }
-		}
-
-		public bool? EnableCheckSessionEndpoint
-		{
-			get { return _enableCheckSessionEndpoint; }
-		}
-
-		public bool? EnableTokenRevocationEndpoint
-		{
-			get { return _enableTokenRevocationEndpoint; }
-		}
-
-		public bool? EnableIntrospectionEndpoint
-		{
-			get { return _enableIntrospectionEndpoint; }
-		}
-
-		#endregion
-
-		#region Private Methods
-		private void SetKnownDefaults()
-		{
-			if (!IdentityServerConfig.IsLoadKnownDefaults)
-				return;
-
-			_enableAuthorizeEndpoint = true;
-			_enableTokenEndpoint = true;
-			_enableUserInfoEndpoint = true;
-			_enableDiscoveryEndpoint = true;
-			_enableAccessTokenValidationEndpoint = true;
-			_enableIdentityTokenValidationEndpoint = true;
-			_enableEndSessionEndpoint = true;
-			_enableClientPermissionsEndpoint = true;
-			_enableCspReportEndpoint = true;
-			_enableCheckSessionEndpoint = true;
-			_enableTokenRevocationEndpoint = true;
-			_enableIntrospectionEndpoint = true;
-		}
-		#endregion
-	}
-
-	public class Events : IEvents
-	{
-		#region Fields
-		private bool? _raiseErrorEvents;
-		private bool? _raiseFailureEvents;
-		private bool? _raiseInformationEvents;
-		private bool? _raiseSuccessEvents;
-
-		private XPathNavigator _nav;
-		private IEvents _template = null;
-		#endregion
-
-		#region Constructors
-		public Events(XPathNodeIterator iter, IEvents template)
-		{
-			SetKnownDefaults();
-
-			_template = template;
-
-			if (_template != null)
-			{
-				_raiseErrorEvents = template.RaiseErrorEvents;
-				_raiseFailureEvents = template.RaiseFailureEvents;
-				_raiseInformationEvents = template.RaiseInformationEvents;
-				_raiseSuccessEvents = template.RaiseSuccessEvents;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetBoolNullable("raiseErrorEvents", ref _raiseErrorEvents);
-				_nav.SetBoolNullable("raiseFailureEvents", ref _raiseFailureEvents);
-				_nav.SetBoolNullable("raiseInformationEvents", ref _raiseInformationEvents);
-				_nav.SetBoolNullable("raiseSuccessEvents", ref _raiseSuccessEvents);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public bool? RaiseErrorEvents
-		{
-			get { return _raiseErrorEvents; }
-		}
-
-		public bool? RaiseFailureEvents
-		{
-			get { return _raiseFailureEvents; }
-		}
-
-		public bool? RaiseInformationEvents
-		{
-			get { return _raiseInformationEvents; }
-		}
-
-		public bool? RaiseSuccessEvents
-		{
-			get { return _raiseSuccessEvents; }
-		}
-		#endregion
-
-		#region Private Methods
-		private void SetKnownDefaults()
-		{
-			if (!IdentityServerConfig.IsLoadKnownDefaults)
-				return;
-
-			_raiseErrorEvents = false;
-			_raiseFailureEvents = false;
-			_raiseInformationEvents = false;
-			_raiseSuccessEvents = false;
-		}
-		#endregion
-	}
-
-	public class InputLengthRestrictions : IInputLengthRestrictions
-	{
-		#region Fields
-		private int? _acrValues;
-		private int? _clientId;
-		private int? _cspReport;
-		private int? _grantType;
-		private int? _identityProvider;
-		private int? _loginHint;
-		private int? _nonce;
-		private int? _password;
-		private int? _redirectUri;
-		private int? _scope;
-		private int? _uiLocale;
-		private int? _userName;
-
-		private XPathNavigator _nav;
-		private IInputLengthRestrictions _template = null;
-		#endregion
-
-		#region Constructors
-		public InputLengthRestrictions(XPathNodeIterator iter, IInputLengthRestrictions template)
-		{
-			SetKnownDefaults();
-
-			_template = template;
-
-			if (_template != null)
-			{
-				_acrValues = template.AcrValues;
-				_clientId = template.ClientId;
-				_cspReport = template.CspReport;
-				_grantType = template.GrantType;
-				_identityProvider = template.IdentityProvider;
-				_loginHint = template.LoginHint;
-				_nonce = template.Nonce;
-				_password = template.Password;
-				_redirectUri = template.RedirectUri;
-				_scope = template.Scope;
-				_uiLocale = template.UiLocale;
-				_userName = template.UserName;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetIntNullable("acrValues", ref _acrValues);
-				_nav.SetIntNullable("clientId", ref _clientId);
-				_nav.SetIntNullable("cspReport", ref _cspReport);
-				_nav.SetIntNullable("grantType", ref _grantType);
-				_nav.SetIntNullable("identityProvider", ref _identityProvider);
-				_nav.SetIntNullable("loginHint", ref _loginHint);
-				_nav.SetIntNullable("nonce", ref _nonce);
-				_nav.SetIntNullable("password", ref _password);
-				_nav.SetIntNullable("redirectUri", ref _redirectUri);
-				_nav.SetIntNullable("scope", ref _scope);
-				_nav.SetIntNullable("uiLocale", ref _uiLocale);
-				_nav.SetIntNullable("userName", ref _userName);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public int? AcrValues
-		{
-			get { return _acrValues; }
-		}
-
-		public int? ClientId
-		{
-			get { return _clientId; }
-		}
-
-		public int? CspReport
-		{
-			get { return _cspReport; }
-		}
-
-		public int? GrantType
-		{
-			get { return _grantType; }
-		}
-
-		public int? IdentityProvider
-		{
-			get { return _identityProvider; }
-		}
-
-		public int? LoginHint
-		{
-			get { return _loginHint; }
-		}
-
-		public int? Nonce
-		{
-			get { return _nonce; }
-		}
-
-		public int? Password
-		{
-			get { return _password; }
-		}
-
-		public int? RedirectUri
-		{
-			get { return _redirectUri; }
-		}
-
-		public int? Scope
-		{
-			get { return _scope; }
-		}
-
-		public int? UiLocale
-		{
-			get { return _uiLocale; }
-		}
-
-		public int? UserName
-		{
-			get { return _userName; }
-		}
-		#endregion
-
-		#region Private Methods
-		private void SetKnownDefaults()
-		{
-			if (!IdentityServerConfig.IsLoadKnownDefaults)
-				return;
-
-			_acrValues = 300;
-			_clientId = 100;
-			_cspReport = 2000;
-			_grantType = 100;
-			_identityProvider = 100;
-			_loginHint = 100;
-			_nonce = 300;
-			_password = 100;
-			_redirectUri = 400;
-			_scope = 300;
-			_uiLocale = 100;
-			_userName = 100;
-		}
-		#endregion
-	}
-
-	public class Logging : ILogging
-	{
-		#region Fields
-		private bool? _enableHttpLogging;
-		private bool? _enableKatanaLogging;
-		private bool? _enableWebApiDiagnostics;
-		private bool? _webApiDiagnosticsIsVerbose;
-
-		private XPathNavigator _nav;
-		private ILogging _template = null;
-		#endregion
-
-		#region Constructors
-		public Logging(XPathNodeIterator iter, ILogging template)
-		{
-			SetKnownDefaults();
-
-			_template = template;
-
-			if (_template != null)
-			{
-				_enableHttpLogging = template.EnableHttpLogging;
-				_enableKatanaLogging = template.EnableKatanaLogging;
-				_enableWebApiDiagnostics = template.EnableWebApiDiagnostics;
-				_webApiDiagnosticsIsVerbose = template.WebApiDiagnosticsIsVerbose;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetBoolNullable("enableHttpLogging", ref _enableHttpLogging);
-				_nav.SetBoolNullable("enableKatanaLogging", ref _enableKatanaLogging);
-				_nav.SetBoolNullable("enableWebApiDiagnostics", ref _enableWebApiDiagnostics);
-				_nav.SetBoolNullable("webApiDiagnosticsIsVerbose", ref _webApiDiagnosticsIsVerbose);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public bool? EnableHttpLogging
-		{
-			get { return _enableHttpLogging; }
-		}
-
-		public bool? EnableKatanaLogging
-		{
-			get { return _enableKatanaLogging; }
-		}
-
-		public bool? EnableWebApiDiagnostics
-		{
-			get { return _enableWebApiDiagnostics; }
-		}
-
-		public bool? WebApiDiagnosticsIsVerbose
-		{
-			get { return _webApiDiagnosticsIsVerbose; }
-		}
-		#endregion
-
-		#region Private Methods
-		private void SetKnownDefaults()
-		{
-			if (!IdentityServerConfig.IsLoadKnownDefaults)
-				return;
-
-			_enableHttpLogging = false;
-			_enableKatanaLogging = false;
-			_enableWebApiDiagnostics = false;
-			_webApiDiagnosticsIsVerbose = false;
-		}
-		#endregion
-	}
-
-	public class OperationalData : IOperationalData
-	{
-		#region Fields
-		private bool _isUseInMemoryStore;
-		private bool _isCleanUp;
-		private int _tokenExpiry;
-		private string _connectionKey;
-
-		private XPathNavigator _nav;
-		private IOperationalData _template = null;
-		#endregion
-
-		#region Constructors
-		public OperationalData(XPathNodeIterator iter, IOperationalData template)
-		{
-			_template = template;
-
-			if (_template != null)
-			{
-				_isUseInMemoryStore = template.IsUseInMemoryStore;
-				_isCleanUp = template.IsCleanUp;
-				_tokenExpiry = template.TokenExpiry;
-				_connectionKey = template.ConnectionKey;
-			}
-
-			var isMoveNext = iter.MoveNext();
-			_nav = iter.Current;
-
-			if (isMoveNext)
-			{
-				_nav.SetBool("isUseInMemoryStore", ref _isUseInMemoryStore);
-				_nav.SetBool("isCleanUp", ref _isCleanUp);
-				_nav.SetInt("tokenExpiry", ref _tokenExpiry);
-				_nav.SetString("connectionKey", ref _connectionKey);
-			}
-		}
-		#endregion
-
-		#region Properties
-		public bool IsUseInMemoryStore
-		{
-			get { return _isUseInMemoryStore; }
-		}
-
-		public bool IsCleanUp
-		{
-			get { return _isCleanUp; }
-		}
-
-		public int TokenExpiry
-		{
-			get { return _tokenExpiry; }
-		}
-
-		public string ConnectionKey
-		{
-			get { return _connectionKey; }
-		}
-		#endregion
-
-		#region Private Methods
-		#endregion
-	}
-
-	public class Tenants : List<ITenant>, ITenants
-	{
-		#region Constructors
-		public Tenants(XPathNodeIterator iter, ITenants template)
-		{
-			if (template != null)
-				template.Each(s => Add(s));
-
-			if (iter.MoveNext())
-				Initialize(iter);
-		}
-		#endregion
-
-		#region Private Methods
-		public void Initialize(XPathNodeIterator iter)
-		{
-			iter = iter.Current.Select("tenant");
-
-			while (iter.MoveNext())
-			{
-				var id = Tenant.GetId(iter.Current);
-				var template = this.SingleOrDefault(s => id.HasValue && s.Id == id.Value);
-
-				if (template != null)
-					Remove(template);
-
-				var newValue = new Tenant(iter, template);
-				Add(newValue);
-			}
-		}
-		#endregion
-	}
-
-	public class Tenant : ITenant
-	{
-		#region Fields
-		private eTenant _id;
-		private string _description;
-		private string _connectionKey;
-		#endregion
-
-		#region Constructors
-		public Tenant(XPathNodeIterator iter, ITenant template)
-		{
-			var nav = iter.Current;
-
-			if (template != null)
-			{
-				_id = template.Id;
-				_description = template.Description;
-				_connectionKey = template.ConnectionKey;
-			}
-
-			nav.SetEnum("id", ref _id);
-			nav.SetString("description", ref _description);
-			nav.SetString("connectionKey", ref _connectionKey);
-		}
-		#endregion
-
-		#region Properties
-		public eTenant Id
-		{
-			get { return _id; }
-		}
-
-		public string Description
-		{
-			get { return _description; }
-		}
-
-		public string ConnectionKey
-		{
-			get { return _connectionKey; }
-		}
-		#endregion
-
-		#region Public Methods
-		public static eTenant? GetId(XPathNavigator nav)
-		{
-			var returnValue = new eTenant?();
-			nav.SetEnumNullable("id", ref returnValue);
-			return returnValue;
-		}
-		#endregion
-	}
+    public class IdentityServerOptionsConfig : IIdentityServerOptionsConfig
+    {
+        #region Fields
+        private IAuthentication _authentication;
+        private ICaching _caching;
+        private ICertificate _certificate;
+        private ICors _cors;
+        private ICsp _csp;
+        private IEndPoints _endPoints;
+        private IEvents _events;
+        private IInputLengthRestrictions _inputLengthRestrictions;
+        private ILogging _logging;
+        private IOperationalData _operationalData;
+        private ITenants _tenants;
+
+        private XPathNavigator _nav;
+        private IIdentityServerOptionsConfig _template = null;
+        #endregion
+
+        #region Constructors
+        public IdentityServerOptionsConfig(XPathNodeIterator iter, IIdentityServerOptionsConfig template)
+        {
+            SetKnownDefaults();
+
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            EnableWelcomePage = _nav.GetBoolNullable(nameof(EnableWelcomePage), _template);
+            IssuerUri = _nav.GetString(nameof(IssuerUri), _template);
+            ProtocolLogoutUrls = _nav.GetListString(nameof(ProtocolLogoutUrls), _template);
+            PublicOrigin = _nav.GetString(nameof(PublicOrigin), _template);
+            RequireSsl = _nav.GetBoolNullable(nameof(RequireSsl), _template);
+            SiteName = _nav.GetString(nameof(SiteName), _template);
+        }
+        #endregion
+
+        #region Properties
+        public IAuthentication Authentication
+        {
+            get
+            {
+                if (_authentication == null)
+                    _authentication = new Authentication(_nav.Select(nameof(Authentication).ToLowerFirstLetter()), _template != null ? _template.Authentication : null);
+
+                return _authentication;
+            }
+        }
+
+        public ICaching Caching
+        {
+            get
+            {
+                if (_caching == null)
+                    _caching = new Caching(_nav.Select(nameof(Caching).ToLowerFirstLetter()), _template != null ? _template.Caching : null);
+
+                return _caching;
+            }
+        }
+
+        public ICertificate Certificate
+        {
+            get
+            {
+                if (_certificate == null)
+                    _certificate = new Certificate(_nav.Select(nameof(Certificate).ToLowerFirstLetter()), _template != null ? _template.Certificate : null);
+
+                return _certificate;
+            }
+        }
+
+        public ICors Cors
+        {
+            get
+            {
+                if (_cors == null)
+                    _cors = new Cors(_nav.Select(nameof(Cors).ToLowerFirstLetter()), _template != null ? _template.Cors : null);
+
+                return _cors;
+            }
+        }
+
+        public ICsp Csp
+        {
+            get
+            {
+                if (_csp == null)
+                    _csp = new Csp(_nav.Select(nameof(Csp).ToLowerFirstLetter()), _template != null ? _template.Csp : null);
+
+                return _csp;
+            }
+        }
+
+        public bool? EnableWelcomePage { get; private set; }
+
+        public IEndPoints EndPoints
+        {
+            get
+            {
+                if (_endPoints == null)
+                    _endPoints = new EndPoints(_nav.Select(nameof(EndPoints).ToLowerFirstLetter()), _template != null ? _template.EndPoints : null);
+
+                return _endPoints;
+            }
+        }
+
+        public IEvents Events
+        {
+            get
+            {
+                if (_events == null)
+                    _events = new Events(_nav.Select(nameof(Events).ToLowerFirstLetter()), _template != null ? _template.Events : null);
+
+                return _events;
+            }
+        }
+
+        public IInputLengthRestrictions InputLengthRestrictions
+        {
+            get
+            {
+                if (_inputLengthRestrictions == null)
+                    _inputLengthRestrictions = new InputLengthRestrictions(_nav.Select(nameof(InputLengthRestrictions).ToLowerFirstLetter()), _template != null ? _template.InputLengthRestrictions : null);
+
+                return _inputLengthRestrictions;
+            }
+        }
+
+        public string IssuerUri { get; private set; }
+
+        public ILogging Logging
+        {
+            get
+            {
+                if (_logging == null)
+                    _logging = new Logging(_nav.Select(nameof(Logging).ToLowerFirstLetter()), _template != null ? _template.Logging : null);
+
+                return _logging;
+            }
+        }
+
+        public IOperationalData OperationalData
+        {
+            get
+            {
+                if (_operationalData == null)
+                    _operationalData = new OperationalData(_nav.Select(nameof(OperationalData).ToLowerFirstLetter()), _template != null ? _template.OperationalData : null);
+
+                return _operationalData;
+            }
+        }
+
+        public List<string> ProtocolLogoutUrls { get; private set; }
+
+        public string PublicOrigin { get; private set; }
+
+        public bool? RequireSsl { get; private set; }
+
+        public string SiteName { get; private set; }
+
+        public ITenants Tenants
+        {
+            get
+            {
+                if (_tenants == null)
+                    _tenants = new Tenants(_nav.Select(nameof(Tenants).ToLowerFirstLetter()), _template != null ? _template.Tenants : null);
+
+                return _tenants;
+            }
+        }
+        #endregion
+
+        #region Private Methods
+        private void SetKnownDefaults()
+        {
+            if (!IdentityServerConfig.IsLoadKnownDefaults)
+                return;
+
+            EnableWelcomePage = true;
+            RequireSsl = true;
+        }
+        #endregion
+    }
+
+    public class Authentication : IAuthentication
+    {
+        #region Fields
+        private ICookie _cookie;
+        private ILoginPageLinks _loginPageLinks;
+
+        private XPathNavigator _nav;
+        private IAuthentication _template = null;
+        #endregion
+
+        #region Constructors
+        public Authentication(XPathNodeIterator iter, IAuthentication template)
+        {
+            SetKnownDefaults();
+
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            EnableLoginHint = _nav.GetBoolNullable(nameof(EnableLoginHint), _template);
+            EnableLocalLogin = _nav.GetBoolNullable(nameof(EnableLocalLogin), _template);
+            EnablePostSignOutAutoRedirect = _nav.GetBoolNullable(nameof(EnablePostSignOutAutoRedirect), _template);
+            EnableSignOutPrompt = _nav.GetBoolNullable(nameof(EnableSignOutPrompt), _template);
+            InvalidSignInRedirectUrl = _nav.GetString(nameof(InvalidSignInRedirectUrl), _template);
+            PostSignOutAutoRedirectDelay = _nav.GetIntNullable(nameof(PostSignOutAutoRedirectDelay), _template);
+            RememberLastUsername = _nav.GetBoolNullable(nameof(RememberLastUsername), _template);
+            RequireAuthenticatedUserForSignOutMessage = _nav.GetBoolNullable(nameof(RequireAuthenticatedUserForSignOutMessage), _template);
+            SignInMessageThreshold = _nav.GetIntNullable(nameof(SignInMessageThreshold), _template);
+            IsEnableExternalWindowsAuthentication = _nav.GetBool(nameof(IsEnableExternalWindowsAuthentication), _template);
+            ExternalWindowsAuthenticationCaption = _nav.GetString(nameof(ExternalWindowsAuthenticationCaption), _template);
+            ResetPasswordRedirectUri = _nav.GetString(nameof(ResetPasswordRedirectUri), _template);
+            ResetPasswordUri = _nav.GetString(nameof(ResetPasswordUri), _template);
+        }
+        #endregion
+
+        #region Properties
+        public ICookie Cookie
+        {
+            get
+            {
+                if (_cookie == null)
+                    _cookie = new Cookie(_nav.Select(nameof(Cookie).ToLowerFirstLetter()), _template != null ? _template.Cookie : null);
+
+                return _cookie;
+            }
+        }
+
+        public bool? EnableLoginHint { get; private set; }
+
+        public bool? EnableLocalLogin { get; private set; }
+
+        public bool? EnablePostSignOutAutoRedirect { get; private set; }
+
+        public bool? EnableSignOutPrompt { get; private set; }
+
+        public string InvalidSignInRedirectUrl { get; private set; }
+
+        public ILoginPageLinks LoginPageLinks
+        {
+            get
+            {
+                if (_loginPageLinks == null)
+                    _loginPageLinks = new LoginPageLinks(_nav.Select(nameof(LoginPageLinks).ToLowerFirstLetter()), _template != null ? _template.LoginPageLinks : null);
+
+                return _loginPageLinks;
+            }
+        }
+
+        public int? PostSignOutAutoRedirectDelay { get; private set; }
+
+        public bool? RememberLastUsername { get; private set; }
+
+        public bool? RequireAuthenticatedUserForSignOutMessage { get; private set; }
+
+        public int? SignInMessageThreshold { get; private set; }
+
+        public bool IsEnableExternalWindowsAuthentication { get; private set; }
+
+        public string ExternalWindowsAuthenticationCaption { get; private set; }
+
+        public string ResetPasswordRedirectUri { get; private set; }
+
+        public string ResetPasswordUri { get; private set; }
+        #endregion
+
+        #region Private Methods
+        private void SetKnownDefaults()
+        {
+            if (!IdentityServerConfig.IsLoadKnownDefaults)
+                return;
+
+            EnableLoginHint = true;
+            EnableLocalLogin = true;
+            EnablePostSignOutAutoRedirect = false;
+            EnableSignOutPrompt = true;
+            PostSignOutAutoRedirectDelay = 0;
+            RememberLastUsername = false;
+            RequireAuthenticatedUserForSignOutMessage = false;
+            SignInMessageThreshold = 5;
+        }
+        #endregion
+    }
+
+    public class Cookie : ICookie
+    {
+        #region Fields
+        private XPathNavigator _nav;
+        private ICookie _template = null;
+        #endregion
+
+        #region Constructors
+        public Cookie(XPathNodeIterator iter, ICookie template)
+        {
+            SetKnownDefaults();
+
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            AllowRememberMe = _nav.GetBoolNullable(nameof(AllowRememberMe), _template);
+            ExpireTimeSpan = _nav.GetTimeSpanNullable(nameof(ExpireTimeSpan), _template);
+            IsPersistent = _nav.GetBoolNullable(nameof(IsPersistent), _template);
+            Path = _nav.GetString(nameof(Path), _template);
+            Prefix = _nav.GetString(nameof(Prefix), _template);
+            RememberMeDuration = _nav.GetTimeSpanNullable(nameof(RememberMeDuration), _template);
+            SecureMode = _nav.GetEnumNullable<eCookieSecureMode>(nameof(SecureMode), _template);
+            SlidingExpiration = _nav.GetBoolNullable(nameof(SlidingExpiration), _template);
+        }
+        #endregion
+
+        #region Properties
+        public bool? AllowRememberMe { get; private set; }
+
+        public TimeSpan? ExpireTimeSpan { get; private set; }
+
+        public bool? IsPersistent { get; private set; }
+
+        public string Path { get; private set; }
+
+        public string Prefix { get; private set; }
+
+        public TimeSpan? RememberMeDuration { get; private set; }
+
+        public eCookieSecureMode? SecureMode { get; private set; }
+
+        public bool? SlidingExpiration { get; private set; }
+        #endregion
+
+        #region Private Methods
+        private void SetKnownDefaults()
+        {
+            if (!IdentityServerConfig.IsLoadKnownDefaults)
+                return;
+
+            AllowRememberMe = true;
+            ExpireTimeSpan = TimeSpan.FromHours(10);
+            IsPersistent = false;
+            RememberMeDuration = TimeSpan.FromDays(30);
+            SecureMode = eCookieSecureMode.SameAsRequest;
+            SlidingExpiration = false;
+        }
+        #endregion
+    }
+
+    public class LoginPageLinks : List<ILoginPageLink>, ILoginPageLinks
+    {
+        #region Constructors
+        public LoginPageLinks(XPathNodeIterator iter, ILoginPageLinks template)
+        {
+            if (template != null)
+                template.Each(l => Add(l));
+
+            if (iter.MoveNext())
+                Initialize(iter);
+        }
+        #endregion
+
+        #region Private Methods
+        public void Initialize(XPathNodeIterator iter)
+        {
+            iter = iter.Current.Select("link");
+
+            while (iter.MoveNext())
+            {
+                var href = LoginPageLink.GetHref(iter.Current);
+                var template = this.SingleOrDefault(l => l.Href == href);
+
+                if (template != null)
+                    Remove(template);
+
+                var newValue = new LoginPageLink(iter, template);
+                Add(newValue);
+            }
+        }
+        #endregion
+    }
+
+    public class LoginPageLink : ILoginPageLink
+    {
+        #region Constructors
+        public LoginPageLink(XPathNodeIterator iter, ILoginPageLink template)
+        {
+            var nav = iter.Current;
+
+            Href = nav.GetString(nameof(Href), template);
+            Text = nav.GetString(nameof(Text), template);
+            Type = nav.GetString(nameof(Type), template);
+        }
+        #endregion
+
+        #region Properties
+        public string Href { get; private set; }
+
+        public string Text { get; private set; }
+
+        public string Type { get; private set; }
+        #endregion
+
+        #region Public Methods
+        public static string GetHref(XPathNavigator nav)
+        {
+            return nav.GetString(nameof(Href));
+        }
+        #endregion
+    }
+
+    public class Caching : ICaching
+    {
+        #region Fields
+        private XPathNavigator _nav;
+        private ICaching _template = null;
+        #endregion
+
+        #region Constructors
+        public Caching(XPathNodeIterator iter, ICaching template)
+        {
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            IsEnabledClients = _nav.GetBool(nameof(IsEnabledClients), _template);
+            IsEnabledScopes = _nav.GetBool(nameof(IsEnabledScopes), _template);
+            IsEnabledUsers = _nav.GetBool(nameof(IsEnabledUsers), _template);
+            IsUseInMemoryStore = _nav.GetBool(nameof(IsUseInMemoryStore), _template);
+            CustomType = _nav.GetEnum<eCacheType>(nameof(CustomType), _template);
+            ClientExpiry = _nav.GetTimeSpan(nameof(ClientExpiry), _template);
+            ScopeExpiry = _nav.GetTimeSpan(nameof(ScopeExpiry), _template);
+            UserExpiry = _nav.GetTimeSpan(nameof(UserExpiry), _template);
+            UsersExpiry = _nav.GetTimeSpan(nameof(UsersExpiry), _template);
+        }
+        #endregion
+
+        #region Properties
+        public bool IsEnabledClients { get; private set; }
+
+        public bool IsEnabledScopes { get; private set; }
+
+        public bool IsEnabledUsers { get; private set; }
+
+        public bool IsUseInMemoryStore { get; private set; }
+
+        public eCacheType CustomType { get; private set; }
+
+        public TimeSpan ClientExpiry { get; private set; }
+
+        public TimeSpan ScopeExpiry { get; private set; }
+
+        public TimeSpan UserExpiry { get; private set; }
+
+        public TimeSpan UsersExpiry { get; private set; }
+        #endregion
+    }
+
+    public class Certificate : ICertificate
+    {
+        #region Fields
+        private XPathNavigator _nav;
+        private ICertificate _template = null;
+        #endregion
+
+        #region Constructors
+        public Certificate(XPathNodeIterator iter, ICertificate template)
+        {
+            SetKnownDefaults();
+
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            Name = _nav.GetString(nameof(Name), _template);
+            StoreName = _nav.GetEnum<StoreName>(nameof(StoreName), _template);
+            StoreLocation = _nav.GetEnum<StoreLocation>(nameof(StoreLocation), _template);
+            FileName = _nav.GetString(nameof(FileName), _template);
+            Password = _nav.GetString(nameof(Password), _template);
+            StorageFlags = _nav.GetFlagsNullable<X509KeyStorageFlags>(nameof(StorageFlags), _template);
+        }
+        #endregion
+
+        #region Properties
+        public string Name { get; private set; }
+
+        public StoreName StoreName { get; private set; }
+
+        public StoreLocation StoreLocation { get; private set; }
+
+        public string FileName { get; private set; }
+
+        public string Password { get; private set; }
+
+        public X509KeyStorageFlags? StorageFlags { get; private set; }
+        #endregion
+
+        #region Private Methods
+        private void SetKnownDefaults()
+        {
+            if (!IdentityServerConfig.IsLoadKnownDefaults)
+                return;
+
+            StorageFlags = X509KeyStorageFlags.UserKeySet;
+        }
+        #endregion
+    }
+
+    public class Cors : ICors
+    {
+        #region Fields
+        private XPathNavigator _nav;
+        private ICors _template = null;
+        #endregion
+
+        #region Constructors
+        public Cors(XPathNodeIterator iter, ICors template)
+        {
+            SetKnownDefaults();
+
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            IsUseInMemoryStore = _nav.GetBool(nameof(IsUseInMemoryStore), _template);
+            AllowAllCustom = _nav.GetBool(nameof(AllowAllCustom), _template);
+            AllowedOriginsCustom = _nav.GetListString(nameof(AllowedOriginsCustom), _template);
+        }
+        #endregion
+
+        #region Properties
+        public bool IsUseInMemoryStore { get; private set; }
+
+        public bool AllowAllCustom { get; private set; }
+
+        public List<string> AllowedOriginsCustom { get; private set; }
+        #endregion
+
+        #region Private Methods
+        private void SetKnownDefaults()
+        {
+            if (!IdentityServerConfig.IsLoadKnownDefaults)
+                return;
+        }
+        #endregion
+    }
+
+    public class Csp : ICsp
+    {
+        #region Fields
+        private XPathNavigator _nav;
+        private ICsp _template = null;
+        #endregion
+
+        #region Constructors
+        public Csp(XPathNodeIterator iter, ICsp template)
+        {
+            SetKnownDefaults();
+
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            ConnectSource = _nav.GetString(nameof(ConnectSource), _template);
+            Enabled = _nav.GetBoolNullable(nameof(Enabled), _template);
+            FontSource = _nav.GetString(nameof(FontSource), _template);
+            ImageSource = _nav.GetString(nameof(ImageSource), _template);
+            ScriptSource = _nav.GetString(nameof(ScriptSource), _template);
+            StyleSource = _nav.GetString(nameof(StyleSource), _template);
+        }
+        #endregion
+
+        #region Properties
+        public string ConnectSource { get; private set; }
+
+        public bool? Enabled { get; private set; }
+
+        public string FontSource { get; private set; }
+
+        public string ImageSource { get; private set; }
+
+        public string ScriptSource { get; private set; }
+
+        public string StyleSource { get; private set; }
+        #endregion
+
+        #region Private Methods
+        private void SetKnownDefaults()
+        {
+            if (!IdentityServerConfig.IsLoadKnownDefaults)
+                return;
+
+            Enabled = true;
+        }
+        #endregion
+    }
+
+    public class EndPoints : IEndPoints
+    {
+        #region Fields
+        private XPathNavigator _nav;
+        private IEndPoints _template = null;
+        #endregion
+
+        #region Constructors
+        public EndPoints(XPathNodeIterator iter, IEndPoints template)
+        {
+            SetKnownDefaults();
+
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            EnableAuthorizeEndpoint = _nav.GetBoolNullable(nameof(EnableAuthorizeEndpoint), _template);
+            EnableTokenEndpoint = _nav.GetBoolNullable(nameof(EnableTokenEndpoint), _template);
+            EnableUserInfoEndpoint = _nav.GetBoolNullable(nameof(EnableUserInfoEndpoint), _template);
+            EnableDiscoveryEndpoint = _nav.GetBoolNullable(nameof(EnableDiscoveryEndpoint), _template);
+            EnableAccessTokenValidationEndpoint = _nav.GetBoolNullable(nameof(EnableAccessTokenValidationEndpoint), _template);
+            EnableIdentityTokenValidationEndpoint = _nav.GetBoolNullable(nameof(EnableIdentityTokenValidationEndpoint), _template);
+            EnableEndSessionEndpoint = _nav.GetBoolNullable(nameof(EnableEndSessionEndpoint), _template);
+            EnableClientPermissionsEndpoint = _nav.GetBoolNullable(nameof(EnableClientPermissionsEndpoint), _template);
+            EnableCspReportEndpoint = _nav.GetBoolNullable(nameof(EnableCspReportEndpoint), _template);
+            EnableCheckSessionEndpoint = _nav.GetBoolNullable(nameof(EnableCheckSessionEndpoint), _template);
+            EnableTokenRevocationEndpoint = _nav.GetBoolNullable(nameof(EnableTokenRevocationEndpoint), _template);
+            EnableIntrospectionEndpoint = _nav.GetBoolNullable(nameof(EnableIntrospectionEndpoint), _template);
+        }
+        #endregion
+
+        #region Properties
+        public bool? EnableAuthorizeEndpoint { get; private set; }
+
+        public bool? EnableTokenEndpoint { get; private set; }
+
+        public bool? EnableUserInfoEndpoint { get; private set; }
+
+        public bool? EnableDiscoveryEndpoint { get; private set; }
+
+        public bool? EnableAccessTokenValidationEndpoint { get; private set; }
+
+        public bool? EnableIdentityTokenValidationEndpoint { get; private set; }
+
+        public bool? EnableEndSessionEndpoint { get; private set; }
+
+        public bool? EnableClientPermissionsEndpoint { get; private set; }
+
+        public bool? EnableCspReportEndpoint { get; private set; }
+
+        public bool? EnableCheckSessionEndpoint { get; private set; }
+
+        public bool? EnableTokenRevocationEndpoint { get; private set; }
+
+        public bool? EnableIntrospectionEndpoint { get; private set; }
+        #endregion
+
+        #region Private Methods
+        private void SetKnownDefaults()
+        {
+            if (!IdentityServerConfig.IsLoadKnownDefaults)
+                return;
+
+            EnableAuthorizeEndpoint = true;
+            EnableTokenEndpoint = true;
+            EnableUserInfoEndpoint = true;
+            EnableDiscoveryEndpoint = true;
+            EnableAccessTokenValidationEndpoint = true;
+            EnableIdentityTokenValidationEndpoint = true;
+            EnableEndSessionEndpoint = true;
+            EnableClientPermissionsEndpoint = true;
+            EnableCspReportEndpoint = true;
+            EnableCheckSessionEndpoint = true;
+            EnableTokenRevocationEndpoint = true;
+            EnableIntrospectionEndpoint = true;
+        }
+        #endregion
+    }
+
+    public class Events : IEvents
+    {
+        #region Fields
+        private XPathNavigator _nav;
+        private IEvents _template = null;
+        #endregion
+
+        #region Constructors
+        public Events(XPathNodeIterator iter, IEvents template)
+        {
+            SetKnownDefaults();
+
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            RaiseErrorEvents = _nav.GetBoolNullable(nameof(RaiseErrorEvents), _template);
+            RaiseFailureEvents = _nav.GetBoolNullable(nameof(RaiseFailureEvents), _template);
+            RaiseInformationEvents = _nav.GetBoolNullable(nameof(RaiseInformationEvents), _template);
+            RaiseSuccessEvents = _nav.GetBoolNullable(nameof(RaiseSuccessEvents), _template);
+        }
+        #endregion
+
+        #region Properties
+        public bool? RaiseErrorEvents { get; private set; }
+
+        public bool? RaiseFailureEvents { get; private set; }
+
+        public bool? RaiseInformationEvents { get; private set; }
+
+        public bool? RaiseSuccessEvents { get; private set; }
+        #endregion
+
+        #region Private Methods
+        private void SetKnownDefaults()
+        {
+            if (!IdentityServerConfig.IsLoadKnownDefaults)
+                return;
+
+            RaiseErrorEvents = false;
+            RaiseFailureEvents = false;
+            RaiseInformationEvents = false;
+            RaiseSuccessEvents = false;
+        }
+        #endregion
+    }
+
+    public class InputLengthRestrictions : IInputLengthRestrictions
+    {
+        #region Fields
+        private XPathNavigator _nav;
+        private IInputLengthRestrictions _template = null;
+        #endregion
+
+        #region Constructors
+        public InputLengthRestrictions(XPathNodeIterator iter, IInputLengthRestrictions template)
+        {
+            SetKnownDefaults();
+
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            AcrValues = _nav.GetIntNullable(nameof(AcrValues), _template);
+            ClientId = _nav.GetIntNullable(nameof(ClientId), _template);
+            CspReport = _nav.GetIntNullable(nameof(CspReport), _template);
+            GrantType = _nav.GetIntNullable(nameof(GrantType), _template);
+            IdentityProvider = _nav.GetIntNullable(nameof(IdentityProvider), _template);
+            LoginHint = _nav.GetIntNullable(nameof(LoginHint), _template);
+            Nonce = _nav.GetIntNullable(nameof(Nonce), _template);
+            Password = _nav.GetIntNullable(nameof(Password), _template);
+            RedirectUri = _nav.GetIntNullable(nameof(RedirectUri), _template);
+            Scope = _nav.GetIntNullable(nameof(Scope), _template);
+            UiLocale = _nav.GetIntNullable(nameof(UiLocale), _template);
+            UserName = _nav.GetIntNullable(nameof(UserName), _template);
+        }
+        #endregion
+
+        #region Properties
+        public int? AcrValues { get; private set; }
+
+        public int? ClientId { get; private set; }
+
+        public int? CspReport { get; private set; }
+
+        public int? GrantType { get; private set; }
+
+        public int? IdentityProvider { get; private set; }
+
+        public int? LoginHint { get; private set; }
+
+        public int? Nonce { get; private set; }
+
+        public int? Password { get; private set; }
+
+        public int? RedirectUri { get; private set; }
+
+        public int? Scope { get; private set; }
+
+        public int? UiLocale { get; private set; }
+
+        public int? UserName { get; private set; }
+        #endregion
+
+        #region Private Methods
+        private void SetKnownDefaults()
+        {
+            if (!IdentityServerConfig.IsLoadKnownDefaults)
+                return;
+
+            AcrValues = 300;
+            ClientId = 100;
+            CspReport = 2000;
+            GrantType = 100;
+            IdentityProvider = 100;
+            LoginHint = 100;
+            Nonce = 300;
+            Password = 100;
+            RedirectUri = 400;
+            Scope = 300;
+            UiLocale = 100;
+            UserName = 100;
+        }
+        #endregion
+    }
+
+    public class Logging : ILogging
+    {
+        #region Fields
+        private XPathNavigator _nav;
+        private ILogging _template = null;
+        #endregion
+
+        #region Constructors
+        public Logging(XPathNodeIterator iter, ILogging template)
+        {
+            SetKnownDefaults();
+
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            EnableHttpLogging = _nav.GetBoolNullable(nameof(EnableHttpLogging), _template);
+            EnableKatanaLogging = _nav.GetBoolNullable(nameof(EnableKatanaLogging), _template);
+            EnableWebApiDiagnostics = _nav.GetBoolNullable(nameof(EnableWebApiDiagnostics), _template);
+            WebApiDiagnosticsIsVerbose = _nav.GetBoolNullable(nameof(WebApiDiagnosticsIsVerbose), _template);
+        }
+        #endregion
+
+        #region Properties
+        public bool? EnableHttpLogging { get; private set; }
+
+        public bool? EnableKatanaLogging { get; private set; }
+
+        public bool? EnableWebApiDiagnostics { get; private set; }
+
+        public bool? WebApiDiagnosticsIsVerbose { get; private set; }
+        #endregion
+
+        #region Private Methods
+        private void SetKnownDefaults()
+        {
+            if (!IdentityServerConfig.IsLoadKnownDefaults)
+                return;
+
+            EnableHttpLogging = false;
+            EnableKatanaLogging = false;
+            EnableWebApiDiagnostics = false;
+            WebApiDiagnosticsIsVerbose = false;
+        }
+        #endregion
+    }
+
+    public class OperationalData : IOperationalData
+    {
+        #region Fields
+        private XPathNavigator _nav;
+        private IOperationalData _template = null;
+        #endregion
+
+        #region Constructors
+        public OperationalData(XPathNodeIterator iter, IOperationalData template)
+        {
+            _template = template;
+
+            iter.MoveNext();
+            _nav = iter.Current;
+
+            IsUseInMemoryStore = _nav.GetBool(nameof(IsUseInMemoryStore), _template);
+            IsCleanUp = _nav.GetBool(nameof(IsCleanUp), _template);
+            TokenExpiry = _nav.GetInt(nameof(TokenExpiry), _template);
+            ConnectionKey = _nav.GetString(nameof(ConnectionKey), _template);
+        }
+        #endregion
+
+        #region Properties
+        public bool IsUseInMemoryStore { get; private set; }
+
+        public bool IsCleanUp { get; private set; }
+
+        public int TokenExpiry { get; private set; }
+
+        public string ConnectionKey { get; private set; }
+        #endregion
+    }
+
+    public class Tenants : List<ITenant>, ITenants
+    {
+        #region Constructors
+        public Tenants(XPathNodeIterator iter, ITenants template)
+        {
+            if (template != null)
+                template.Each(s => Add(s));
+
+            if (iter.MoveNext())
+                Initialize(iter);
+        }
+        #endregion
+
+        #region Private Methods
+        public void Initialize(XPathNodeIterator iter)
+        {
+            iter = iter.Current.Select(nameof(Tenant).ToLowerFirstLetter());
+
+            while (iter.MoveNext())
+            {
+                var id = Tenant.GetId(iter.Current);
+                var template = this.SingleOrDefault(s => id.HasValue && s.Id == id.Value);
+
+                if (template != null)
+                    Remove(template);
+
+                var newValue = new Tenant(iter, template);
+                Add(newValue);
+            }
+        }
+        #endregion
+    }
+
+    public class Tenant : ITenant
+    {
+        #region Constructors
+        public Tenant(XPathNodeIterator iter, ITenant template)
+        {
+            var nav = iter.Current;
+
+            Id = nav.GetEnum<eTenant>(nameof(Id), template);
+            Description = nav.GetString(nameof(Description), template);
+            ConnectionKey = nav.GetString(nameof(ConnectionKey), template);
+        }
+        #endregion
+
+        #region Properties
+        public eTenant Id { get; private set; }
+
+        public string Description { get; private set; }
+
+        public string ConnectionKey { get; private set; }
+        #endregion
+
+        #region Public Methods
+        public static eTenant? GetId(XPathNavigator nav)
+        {
+            return nav.GetEnumNullable<eTenant>(nameof(Id));
+        }
+        #endregion
+    }
 }

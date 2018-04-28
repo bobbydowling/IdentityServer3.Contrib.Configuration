@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Xml.XPath;
 
 using IdentityServer3.Contrib.Configuration.Enumeration;
+using IdentityServer3.Contrib.Configuration.Extension;
 using IdentityServer3.Contrib.Configuration.Interface;
 
 namespace IdentityServer3.Contrib.Configuration
@@ -33,7 +34,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_authorization == null)
-					_authorization = new Authorization(GetChild(_nav, "authorization"), _template != null ? _template.Authorization : null);
+					_authorization = new Authorization(GetChild(_nav, nameof(Authorization).ToLowerFirstLetter()), _template != null ? _template.Authorization : null);
 
 				return _authorization;
 			}
@@ -44,7 +45,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_claimsCollection == null)
-					_claimsCollection = new ClaimsCollection(GetChild(_nav, "claimsCollection"), _template != null ? _template.ClaimsCollection : null);
+					_claimsCollection = new ClaimsCollection(GetChild(_nav, nameof(ClaimsCollection).ToLowerFirstLetter()), _template != null ? _template.ClaimsCollection : null);
 
 				return _claimsCollection;
 			}
@@ -67,8 +68,6 @@ namespace IdentityServer3.Contrib.Configuration
 	public class Authorization : IAuthorization
 	{
 		#region Fields
-		private int _timeout;
-
 		private XPathNavigator _nav;
 		private IAuthorization _template = null;
 		#endregion
@@ -79,32 +78,18 @@ namespace IdentityServer3.Contrib.Configuration
 			_template = template;
 			_nav = nav;
 
-			if (_template != null)
-			{
-				_timeout = _template.Timeout;
-			}
-
-			_nav.SetInt("timeout", ref _timeout);
+            Timeout = _nav.GetInt(nameof(Timeout), _template);
 		}
 		#endregion
 
 		#region Properties
-		public int Timeout
-		{
-			get { return _timeout; }
-		}
-		#endregion
-	}
+		public int Timeout { get; private set; }
+        #endregion
+    }
 
 	public class ClaimsCollection : IClaimsCollection
 	{
 		#region Fields
-		private List<eClaimsApplication> _applications;
-		private string _connectionKey;
-		private bool _isCacheEnabled;
-		private eCacheType _cacheType;
-		private TimeSpan _expiry;
-
 		private XPathNavigator _nav;
 		private IClaimsCollection _template = null;
 		#endregion
@@ -115,48 +100,24 @@ namespace IdentityServer3.Contrib.Configuration
 			_template = template;
 			_nav = nav;
 
-			if (_template != null)
-			{
-				_applications = _template.Applications;
-				_connectionKey = _template.ConnectionKey;
-				_isCacheEnabled = _template.IsCacheEnabled;
-				_cacheType = _template.CacheType;
-				_expiry = _template.Expiry;
-			}
-
-			_nav.SetListEnum("applications", ref _applications);
-			_nav.SetString("connectionKey", ref _connectionKey);
-			_nav.SetBool("isCacheEnabled", ref _isCacheEnabled);
-			_nav.SetEnum("cacheType", ref _cacheType);
-			_nav.SetTimeSpan("expiry", ref _expiry);
+            Applications = _nav.GetListEnum<eClaimsApplication>(nameof(Applications), _template);
+            ConnectionKey = _nav.GetString(nameof(ConnectionKey), _template);
+            IsCacheEnabled = _nav.GetBool(nameof(IsCacheEnabled), _template);
+            CacheType = _nav.GetEnum<eCacheType>(nameof(CacheType), _template);
+            Expiry = _nav.GetTimeSpan(nameof(Expiry), _template);
 		}
 		#endregion
 
 		#region Properties
-		public List<eClaimsApplication> Applications
-		{
-			get { return _applications; }
-		}
+		public List<eClaimsApplication> Applications { get; private set; }
 
-		public string ConnectionKey
-		{
-			get { return _connectionKey; }
-		}
+		public string ConnectionKey { get; private set; }
 
-		public bool IsCacheEnabled
-		{
-			get { return _isCacheEnabled; }
-		}
+        public bool IsCacheEnabled { get; private set; }
 
-		public eCacheType CacheType
-		{
-			get { return _cacheType; }
-		}
+        public eCacheType CacheType { get; private set; }
 
-		public TimeSpan Expiry
-		{
-			get { return _expiry; }
-		}
-		#endregion
-	}
+        public TimeSpan Expiry { get; private set; }
+        #endregion
+    }
 }

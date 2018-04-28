@@ -60,9 +60,10 @@
     <Compile Include="Enumeration\eTokenExpiration.cs" />
     <Compile Include="Enumeration\eTokenUsage.cs" />
     <Compile Include="Enumeration\eValidationMode.cs" />
-    <Compile Include="Extension\EnumerableExtensions.cs" />
-    <Compile Include="Extension\StringExtensions.cs" />
-    <Compile Include="Extension\XPathNavigatorExtensions.cs" />
+    <Compile Include="Extension\EnumerableExtension.cs" />
+    <Compile Include="Extension\ObjectExtension.cs" />
+    <Compile Include="Extension\StringExtension.cs" />
+    <Compile Include="Extension\XPathNavigatorExtension.cs" />
     <Compile Include="IdentityManagerConfig.cs" />
     <Compile Include="IdentityServerClientConfig.cs" />
     <Compile Include="IdentityServerConfig.cs" />

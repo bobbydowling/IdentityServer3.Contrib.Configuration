@@ -2,6 +2,7 @@
 using System.Xml;
 using System.Xml.XPath;
 
+using IdentityServer3.Contrib.Configuration.Extension;
 using IdentityServer3.Contrib.Configuration.Interface;
 
 namespace IdentityServer3.Contrib.Configuration
@@ -58,10 +59,10 @@ namespace IdentityServer3.Contrib.Configuration
 		#region Protected Methods
 		protected virtual void GetConfig(XPathNavigator nav)
 		{
-			_application = new ApplicationConfig(GetChild(nav, "application"), null);
-			_aspNetIdentity = new AspNetIdentityConfig(GetChild(nav, "aspNetIdentity"), null);
-			_identityManager = new IdentityManagerConfig(GetChild(nav, "identityManager"), null);
-			_identityServer = new IdentityServerConfig(GetChild(nav, "identityServer"), null);
+			_application = new ApplicationConfig(GetChild(nav, nameof(Application).ToLowerFirstLetter()), null);
+			_aspNetIdentity = new AspNetIdentityConfig(GetChild(nav, nameof(AspNetIdentity).ToLowerFirstLetter()), null);
+			_identityManager = new IdentityManagerConfig(GetChild(nav, nameof(IdentityManager).ToLowerFirstLetter()), null);
+			_identityServer = new IdentityServerConfig(GetChild(nav, nameof(IdentityServer).ToLowerFirstLetter()), null);
 		}
 
 		protected XPathNavigator GetChild(string nodeName)
@@ -86,7 +87,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_application == null)
-					_application = new ApplicationConfig(GetChild("application"), _template != null ? _template.Application : null);
+					_application = new ApplicationConfig(GetChild(nameof(Application).ToLowerFirstLetter()), _template != null ? _template.Application : null);
 
 				return _application;
 			}
@@ -97,7 +98,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_aspNetIdentity == null)
-					_aspNetIdentity = new AspNetIdentityConfig(GetChild("aspNetIdentity"), _template != null ? _template.AspNetIdentity : null);
+					_aspNetIdentity = new AspNetIdentityConfig(GetChild(nameof(AspNetIdentity).ToLowerFirstLetter()), _template != null ? _template.AspNetIdentity : null);
 
 				return _aspNetIdentity;
 			}
@@ -108,7 +109,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_identityManager == null)
-					_identityManager = new IdentityManagerConfig(GetChild("identityManager"), _template != null ? _template.IdentityManager : null);
+					_identityManager = new IdentityManagerConfig(GetChild(nameof(IdentityManager).ToLowerFirstLetter()), _template != null ? _template.IdentityManager : null);
 
 				return _identityManager;
 			}
@@ -119,7 +120,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_identityServer == null)
-					_identityServer = new IdentityServerConfig(GetChild("identityServer"), _template != null ? _template.IdentityServer : null);
+					_identityServer = new IdentityServerConfig(GetChild(nameof(IdentityServer).ToLowerFirstLetter()), _template != null ? _template.IdentityServer : null);
 
 				return _identityServer;
 			}

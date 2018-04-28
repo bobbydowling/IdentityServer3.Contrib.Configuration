@@ -1,4 +1,5 @@
 ﻿using System.Xml.XPath;
+using IdentityServer3.Contrib.Configuration.Extension;
 using IdentityServer3.Contrib.Configuration.Interface;
 
 namespace IdentityServer3.Contrib.Configuration
@@ -31,7 +32,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_client == null)
-					_client = new ClientConfig(GetChild(_nav, "client"), _template != null ? _template.Client : null);
+					_client = new ClientConfig(GetChild(_nav, nameof(Client).ToLowerFirstLetter()), _template != null ? _template.Client : null);
 
 				return _client;
 			}
@@ -42,7 +43,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_server == null)
-					_server = new ServerConfig(GetChild(_nav, "server"), _template != null ? _template.Server : null);
+					_server = new ServerConfig(GetChild(_nav, nameof(Server).ToLowerFirstLetter()), _template != null ? _template.Server : null);
 
 				return _server;
 			}
@@ -64,7 +65,7 @@ namespace IdentityServer3.Contrib.Configuration
 		#region Private Methods
 		private void SetIsLoadKnownDefaults(XPathNavigator nav)
 		{
-			var value = nav.GetAttribute("isLoadKnownDefaults", string.Empty);
+			var value = nav.GetAttribute(nameof(IsLoadKnownDefaults).ToLowerFirstLetter(), string.Empty);
 
 			if (value.HasValue())
 				IsLoadKnownDefaults = bool.Parse(value);

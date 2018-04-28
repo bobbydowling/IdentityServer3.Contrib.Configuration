@@ -4,6 +4,7 @@ using System.Linq;
 using System.Xml.XPath;
 
 using IdentityServer3.Contrib.Configuration.Enumeration;
+using IdentityServer3.Contrib.Configuration.Extension;
 using IdentityServer3.Contrib.Configuration.Interface;
 
 namespace IdentityServer3.Contrib.Configuration
@@ -11,9 +12,6 @@ namespace IdentityServer3.Contrib.Configuration
 	public class ClientConfig : IClientConfig
 	{
 		#region Fields
-		private string _idTokenHint;
-		private eTenant _tenant;
-		private string _uniqueClaimTypeIdentifier;
 		private IOpenIdConnectAuthenticationOptions _openIdConnectAuthenticationOptions;
 		private ICookieAuthenticationOptions _cookieAuthenticationOptions;
 		private IIdentityServerBearerTokenAuthenticationOptions _identityServerBearerTokenAuthenticationOptions;
@@ -30,43 +28,27 @@ namespace IdentityServer3.Contrib.Configuration
 
 			_template = template;
 
-			if (_template != null)
-			{
-				_idTokenHint = template.IdTokenHint;
-				_tenant = template.Tenant;
-				_uniqueClaimTypeIdentifier = template.UniqueClaimTypeIdentifier;
-			}
+            IdTokenHint = nav.GetString(nameof(IdTokenHint), _template);
+            Tenant = nav.GetEnum<eTenant>(nameof(Tenant), _template);
+            UniqueClaimTypeIdentifier = nav.GetString(nameof(UniqueClaimTypeIdentifier), _template);
 
-			nav.SetString("idTokenHint", ref _idTokenHint);
-			nav.SetEnum("tenant", ref _tenant);
-			nav.SetString("uniqueClaimTypeIdentifier", ref _uniqueClaimTypeIdentifier);
-
-			_nav = nav;
+            _nav = nav;
 		}
 		#endregion
 
 		#region Properties
-		public string IdTokenHint
-		{
-			get { return _idTokenHint; }
-		}
+		public string IdTokenHint { get; private set; }
 
-		public eTenant Tenant
-		{
-			get { return _tenant; }
-		}
+        public eTenant Tenant { get; private set; }
 
-		public string UniqueClaimTypeIdentifier
-		{
-			get { return _uniqueClaimTypeIdentifier; }
-		}
+        public string UniqueClaimTypeIdentifier { get; private set; }
 
-		public IOpenIdConnectAuthenticationOptions OpenIdConnectAuthenticationOptions
+        public IOpenIdConnectAuthenticationOptions OpenIdConnectAuthenticationOptions
 		{
 			get
 			{
 				if (_openIdConnectAuthenticationOptions == null)
-					_openIdConnectAuthenticationOptions = new OpenIdConnectAuthenticationOptions(_nav.Select("openIdConnectAuthenticationOptions"), _template != null ? _template.OpenIdConnectAuthenticationOptions : null);
+					_openIdConnectAuthenticationOptions = new OpenIdConnectAuthenticationOptions(_nav.Select(nameof(OpenIdConnectAuthenticationOptions).ToLowerFirstLetter()), _template != null ? _template.OpenIdConnectAuthenticationOptions : null);
 
 				return _openIdConnectAuthenticationOptions;
 			}
@@ -77,7 +59,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_cookieAuthenticationOptions == null)
-					_cookieAuthenticationOptions = new CookieAuthenticationOptions(_nav.Select("cookieAuthenticationOptions"), _template != null ? _template.CookieAuthenticationOptions : null);
+					_cookieAuthenticationOptions = new CookieAuthenticationOptions(_nav.Select(nameof(CookieAuthenticationOptions).ToLowerFirstLetter()), _template != null ? _template.CookieAuthenticationOptions : null);
 
 				return _cookieAuthenticationOptions;
 			}
@@ -88,7 +70,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_identityServerBearerTokenAuthenticationOptions == null)
-					_identityServerBearerTokenAuthenticationOptions = new IdentityServerBearerTokenAuthenticationOptions(_nav.Select("identityServerBearerTokenAuthenticationOptions"), _template != null ? _template.IdentityServerBearerTokenAuthenticationOptions : null);
+					_identityServerBearerTokenAuthenticationOptions = new IdentityServerBearerTokenAuthenticationOptions(_nav.Select(nameof(IdentityServerBearerTokenAuthenticationOptions).ToLowerFirstLetter()), _template != null ? _template.IdentityServerBearerTokenAuthenticationOptions : null);
 
 				return _identityServerBearerTokenAuthenticationOptions;
 			}
@@ -99,7 +81,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_clientCredentialOptions == null)
-					_clientCredentialOptions = new ClientCredentialOptions(_nav.Select("clientCredentialOptions"), _template != null ? _template.ClientCredentialOptions : null);
+					_clientCredentialOptions = new ClientCredentialOptions(_nav.Select(nameof(ClientCredentialOptions).ToLowerFirstLetter()), _template != null ? _template.ClientCredentialOptions : null);
 
 				return _clientCredentialOptions;
 			}
@@ -118,20 +100,7 @@ namespace IdentityServer3.Contrib.Configuration
 	public class CookieAuthenticationOptions : ICookieAuthenticationOptions
 	{
 		#region Fields
-		private eAuthenticationMode _authenticationMode;
-		private string _authenticationType;
-		private string _cookieDomain;
-		private bool _cookieHttpOnly;
-		private string _cookieName;
-		private string _cookiePath;
-		private eCookieSecureOption _cookieSecure;
 		private IDescription _description;
-		private TimeSpan _expireTimeSpan;
-		private string _loginPath;
-		private string _logoutPath;
-		private string _returnUrlParameter;
-		private bool _slidingExpiration;
-
 		private XPathNavigator _nav;
 		private ICookieAuthenticationOptions _template = null;
 		#endregion
@@ -143,118 +112,63 @@ namespace IdentityServer3.Contrib.Configuration
 
 			_template = template;
 
-			if (_template != null)
-			{
-				_authenticationMode = _template.AuthenticationMode;
-				_authenticationType = _template.AuthenticationType;
-				_cookieDomain = _template.CookieDomain;
-				_cookieHttpOnly = _template.CookieHttpOnly;
-				_cookieName = _template.CookieName;
-				_cookiePath = _template.CookiePath;
-				_cookieSecure = _template.CookieSecure;
-				_expireTimeSpan = _template.ExpireTimeSpan;
-				_loginPath = _template.LoginPath;
-				_logoutPath = _template.LogoutPath;
-				_returnUrlParameter = _template.ReturnUrlParameter;
-				_slidingExpiration = _template.SlidingExpiration;
-			}
-
-			var isMoveNext = iter.MoveNext();
+			iter.MoveNext();
 			_nav = iter.Current;
 
-			if (isMoveNext)
-			{
-				_nav.SetEnum("authenticationMode", ref _authenticationMode);
-				_nav.SetString("authenticationType", ref _authenticationType);
-				_nav.SetString("cookieDomain", ref _cookieDomain);
-				_nav.SetBool("cookieHttpOnly", ref _cookieHttpOnly);
-				_nav.SetString("cookieName", ref _cookieName);
-				_nav.SetString("cookiePath", ref _cookiePath);
-				_nav.SetEnum("cookieSecure", ref _cookieSecure);
-				_nav.SetTimeSpan("expireTimeSpan", ref _expireTimeSpan);
-				_nav.SetString("loginPath", ref _loginPath);
-				_nav.SetString("logoutPath", ref _logoutPath);
-				_nav.SetString("returnUrlParameter", ref _returnUrlParameter);
-				_nav.SetBool("slidingExpiration", ref _slidingExpiration);
-			}
-		}
+            AuthenticationMode = _nav.GetEnum<eAuthenticationMode>(nameof(AuthenticationMode), _template);
+            AuthenticationType = _nav.GetString(nameof(AuthenticationType), _template);
+            CookieDomain = _nav.GetString(nameof(CookieDomain), _template);
+            CookieHttpOnly = _nav.GetBool(nameof(CookieHttpOnly), _template);
+            CookieName = _nav.GetString(nameof(CookieName), _template);
+            CookiePath = _nav.GetString(nameof(CookiePath), _template);
+            CookieSecure = _nav.GetEnum<eCookieSecureOption>(nameof(CookieSecure), _template);
+            ExpireTimeSpan = _nav.GetTimeSpan(nameof(ExpireTimeSpan), _template);
+            LoginPath = _nav.GetString(nameof(LoginPath), _template);
+            LogoutPath = _nav.GetString(nameof(LogoutPath), _template);
+            ReturnUrlParameter = _nav.GetString(nameof(ReturnUrlParameter), _template);
+            SlidingExpiration = _nav.GetBool(nameof(SlidingExpiration), _template);
+        }
 		#endregion
 
 		#region Properties
-		public eAuthenticationMode AuthenticationMode
-		{
-			get { return _authenticationMode; }
-		}
+		public eAuthenticationMode AuthenticationMode { get; private set; }
 
-		public string AuthenticationType
-		{
-			get { return _authenticationType; }
-		}
+        public string AuthenticationType { get; private set; }
 
-		public string CookieDomain
-		{
-			get { return _cookieDomain; }
-		}
+        public string CookieDomain { get; private set; }
 
-		public bool CookieHttpOnly
-		{
-			get { return _cookieHttpOnly; }
-		}
+        public bool CookieHttpOnly { get; private set; }
 
-		public string CookieName
-		{
-			get { return _cookieName; }
-		}
+        public string CookieName { get; private set; }
 
-		public string CookiePath
-		{
-			get { return _cookiePath; }
-		}
+        public string CookiePath { get; private set; }
 
-		public eCookieSecureOption CookieSecure
-		{
-			get { return _cookieSecure; }
-		}
+        public eCookieSecureOption CookieSecure { get; private set; }
 
-		public IDescription Description
+        public IDescription Description
 		{
 			get
 			{
 				if (_description == null)
-					_description = new Description(_nav.Select("description"), _template != null ? _template.Description : null);
+					_description = new Description(_nav.Select(nameof(Description).ToLowerFirstLetter()), _template != null ? _template.Description : null);
 
 				return _description;
 			}
 		}
 
-		public TimeSpan ExpireTimeSpan
-		{
-			get { return _expireTimeSpan; }
-		}
+		public TimeSpan ExpireTimeSpan { get; private set; }
 
-		public string LoginPath
-		{
-			get { return _loginPath; }
-		}
+        public string LoginPath { get; private set; }
 
-		public string LogoutPath
-		{
-			get { return _logoutPath; }
-		}
+        public string LogoutPath { get; private set; }
 
-		public string ReturnUrlParameter
-		{
-			get { return _returnUrlParameter; }
-		}
+        public string ReturnUrlParameter { get; private set; }
 
-		public bool SlidingExpiration
-		{
-			get { return _slidingExpiration; }
-		}
-		#endregion
+        public bool SlidingExpiration { get; private set; }
+        #endregion
 
-		#region Private Methods
-		private void SetKnownDefaults()
+        #region Private Methods
+        private void SetKnownDefaults()
 		{
 			if (!IdentityServerConfig.IsLoadKnownDefaults)
 				return;
@@ -265,10 +179,7 @@ namespace IdentityServer3.Contrib.Configuration
 	public class Description : IDescription
 	{
 		#region Fields
-		private string _authenticationType;
-		private string _caption;
 		private IProperties _properties;
-
 		private XPathNavigator _nav;
 		private IDescription _template = null;
 		#endregion
@@ -280,40 +191,25 @@ namespace IdentityServer3.Contrib.Configuration
 
 			_template = template;
 
-			if (_template != null)
-			{
-				_authenticationType = _template.AuthenticationType;
-				_caption = _template.Caption;
-			}
-
-			var isMoveNext = iter.MoveNext();
+			iter.MoveNext();
 			_nav = iter.Current;
 
-			if (isMoveNext)
-			{
-				_nav.SetString("authenticationType", ref _authenticationType);
-				_nav.SetString("caption", ref _caption);
-			}
-		}
+            AuthenticationType = _nav.GetString(nameof(AuthenticationType), _template);
+            Caption = _nav.GetString(nameof(Caption), _template);
+        }
 		#endregion
 
 		#region Properties
-		public string AuthenticationType
-		{
-			get { return _authenticationType; }
-		}
+		public string AuthenticationType { get; private set; }
 
-		public string Caption
-		{
-			get { return _caption; }
-		}
+        public string Caption { get; private set; }
 
-		public IProperties Properties
+        public IProperties Properties
 		{
 			get
 			{
 				if (_properties == null)
-					_properties = new Properties(_nav.Select("properties"), _template != null ? _template.Properties : null);
+					_properties = new Properties(_nav.Select(nameof(Properties).ToLowerFirstLetter()), _template != null ? _template.Properties : null);
 
 				return _properties;
 			}
@@ -345,7 +241,7 @@ namespace IdentityServer3.Contrib.Configuration
 		#region Private Methods
 		public void Initialize(XPathNodeIterator iter)
 		{
-			iter = iter.Current.Select("property");
+			iter = iter.Current.Select(nameof(Property).ToLowerFirstLetter());
 
 			while (iter.MoveNext())
 			{
@@ -364,72 +260,36 @@ namespace IdentityServer3.Contrib.Configuration
 
 	public class Property : IProperty
 	{
-		#region Fields
-		private string _id;
-		private string _value;
-		#endregion
-
 		#region Constructors
 		public Property(XPathNodeIterator iter, IProperty template)
 		{
 			var nav = iter.Current;
 
-			if (template != null)
-			{
-				_id = template.Id;
-				_value = template.Value;
-			}
-
-			nav.SetString("id", ref _id);
-			nav.SetString("value", ref _value);
-		}
+            Id = nav.GetString(nameof(Id), template);
+            Value = nav.GetString(nameof(Value), template);
+        }
 		#endregion
 
 		#region Properties
-		public string Id
-		{
-			get { return _id; }
-		}
+		public string Id { get; private set; }
 
-		public string Value
-		{
-			get { return _value; }
-		}
-		#endregion
+        public string Value { get; private set; }
+        #endregion
 
-		#region Public Methods
-		public static string GetId(XPathNavigator nav)
+        #region Public Methods
+        public static string GetId(XPathNavigator nav)
 		{
-			var returnValue = string.Empty;
-			nav.SetString("id", ref returnValue);
-			return returnValue;
-		}
+            return nav.GetString(nameof(Id));
+        }
 		#endregion
 	}
 
 	public class OpenIdConnectAuthenticationOptions : IOpenIdConnectAuthenticationOptions
 	{
 		#region Fields
-		private eAuthenticationMode _authenticationMode;
-		private string _authenticationType;
-		private string _authority;
-		private TimeSpan _backChannelHttpHandler;
-		private string _callBackPath;
-		private string _caption;
-		private string _clientId;
-		private string _clientSecret;
 		private IConfiguration _configuration;
 		private IDescription _description;
-		private string _metaDataAddress;
-		private string _postLogoutRedirectUri;
 		private IProtocolValidator _protocolValidator;
-		private string _redirectUri;
-		private string _resource;
-		private string _responseType;
-		private bool _refreshOnIssuerKeyNotFound;
-		private string _signInAsAuthenticationType;
-		private string _scope;
-		private bool _useTokenLifeTime;
 
 		private XPathNavigator _nav;
 		private IOpenIdConnectAuthenticationOptions _template = null;
@@ -442,100 +302,52 @@ namespace IdentityServer3.Contrib.Configuration
 
 			_template = template;
 
-			if (_template != null)
-			{
-				_authenticationMode = template.AuthenticationMode;
-				_authenticationType = template.AuthenticationType;
-				_authority = template.Authority;
-				_backChannelHttpHandler = template.BackChannelHttpHandler;
-				_callBackPath = template.CallBackPath;
-				_caption = template.Caption;
-				_clientId = template.ClientId;
-				_clientSecret = template.ClientSecret;
-				_metaDataAddress = template.MetaDataAddress;
-				_postLogoutRedirectUri = template.PostLogoutRedirectUri;
-				_redirectUri = template.RedirectUri;
-				_resource = template.Resource;
-				_responseType = template.ResponseType;
-				_refreshOnIssuerKeyNotFound = template.RefreshOnIssuerKeyNotFound;
-				_signInAsAuthenticationType = template.SignInAsAuthenticationType;
-				_scope = template.Scope;
-				_useTokenLifeTime = template.UseTokenLifeTime;
-			}
-
-			var isMoveNext = iter.MoveNext();
+			iter.MoveNext();
 			_nav = iter.Current;
 
-			if (isMoveNext)
-			{
-				_nav.SetEnum("authenticationMode", ref _authenticationMode);
-				_nav.SetString("authenticationType", ref _authenticationType);
-				_nav.SetString("authority", ref _authority);
-				_nav.SetTimeSpan("backChannelHttpHandler", ref _backChannelHttpHandler);
-				_nav.SetString("callBackPath", ref _callBackPath);
-				_nav.SetString("caption", ref _caption);
-				_nav.SetString("clientId", ref _clientId);
-				_nav.SetString("clientSecret", ref _clientSecret);
-				_nav.SetString("metaDataAddress", ref _metaDataAddress);
-				_nav.SetString("postLogoutRedirectUri", ref _postLogoutRedirectUri);
-				_nav.SetString("redirectUri", ref _redirectUri);
-				_nav.SetString("resource", ref _resource);
-				_nav.SetString("responseType", ref _responseType);
-				_nav.SetBool("refreshOnIssuerKeyNotFound", ref _refreshOnIssuerKeyNotFound);
-				_nav.SetString("signInAsAuthenticationType", ref _signInAsAuthenticationType);
-				_nav.SetString("scope", ref _scope);
-				_nav.SetBool("useTokenLifeTime", ref _useTokenLifeTime);
-			}
-		}
+            AuthenticationMode = _nav.GetEnum<eAuthenticationMode>(nameof(AuthenticationMode), _template);
+            AuthenticationType = _nav.GetString(nameof(AuthenticationType), _template);
+            Authority = _nav.GetString(nameof(Authority), _template);
+            BackChannelHttpHandler = _nav.GetTimeSpan(nameof(BackChannelHttpHandler), _template);
+            CallBackPath = _nav.GetString(nameof(CallBackPath), _template);
+            Caption = _nav.GetString(nameof(Caption), _template);
+            ClientId = _nav.GetString(nameof(ClientId), _template);
+            ClientSecret = _nav.GetString(nameof(ClientSecret), _template);
+            MetaDataAddress = _nav.GetString(nameof(MetaDataAddress), _template);
+            PostLogoutRedirectUri = _nav.GetString(nameof(PostLogoutRedirectUri), _template);
+            RedirectUri = _nav.GetString(nameof(RedirectUri), _template);
+            Resource = _nav.GetString(nameof(Resource), _template);
+            ResponseType = _nav.GetString(nameof(ResponseType), _template);
+            RefreshOnIssuerKeyNotFound = _nav.GetBool(nameof(RefreshOnIssuerKeyNotFound), _template);
+            SignInAsAuthenticationType = _nav.GetString(nameof(SignInAsAuthenticationType), _template);
+            Scope = _nav.GetString(nameof(Scope), _template);
+            UseTokenLifeTime = _nav.GetBool(nameof(UseTokenLifeTime), _template);
+        }
 		#endregion
 
 		#region Properties
-		public eAuthenticationMode AuthenticationMode
-		{
-			get { return _authenticationMode; }
-		}
+		public eAuthenticationMode AuthenticationMode { get; private set; }
 
-		public string AuthenticationType
-		{
-			get { return _authenticationType; }
-		}
+        public string AuthenticationType { get; private set; }
 
-		public string Authority
-		{
-			get { return _authority; }
-		}
+        public string Authority { get; private set; }
 
-		public TimeSpan BackChannelHttpHandler
-		{
-			get { return _backChannelHttpHandler; }
-		}
+        public TimeSpan BackChannelHttpHandler { get; private set; }
 
-		public string CallBackPath
-		{
-			get { return _callBackPath; }
-		}
+        public string CallBackPath { get; private set; }
 
-		public string Caption
-		{
-			get { return _caption; }
-		}
+        public string Caption { get; private set; }
 
-		public string ClientId
-		{
-			get { return _clientId; }
-		}
+        public string ClientId { get; private set; }
 
-		public string ClientSecret
-		{
-			get { return _clientSecret; }
-		}
+        public string ClientSecret { get; private set; }
 
-		public IConfiguration Configuration
+        public IConfiguration Configuration
 		{
 			get
 			{
 				if (_configuration == null)
-					_configuration = new Configuration(_nav.Select("configuration"), _template != null ? _template.Configuration : null);
+					_configuration = new Configuration(_nav.Select(nameof(Configuration).ToLowerFirstLetter()), _template != null ? _template.Configuration : null);
 
 				return _configuration;
 			}
@@ -546,71 +358,44 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_description == null)
-					_description = new Description(_nav.Select("description"), _template != null ? _template.Description : null);
+					_description = new Description(_nav.Select(nameof(Description).ToLowerFirstLetter()), _template != null ? _template.Description : null);
 
 				return _description;
 			}
 		}
 
-		public string MetaDataAddress
-		{
-			get { return _metaDataAddress; }
-		}
+		public string MetaDataAddress { get; private set; }
 
-		public string PostLogoutRedirectUri
-		{
-			get { return _postLogoutRedirectUri; }
-		}
+        public string PostLogoutRedirectUri { get; private set; }
 
-		public IProtocolValidator ProtocolValidator
+        public IProtocolValidator ProtocolValidator
 		{
 			get
 			{
 				if (_protocolValidator == null)
-					_protocolValidator = new ProtocolValidator(_nav.Select("protocolValidator"), _template != null ? _template.ProtocolValidator : null);
+					_protocolValidator = new ProtocolValidator(_nav.Select(nameof(ProtocolValidator).ToLowerFirstLetter()), _template != null ? _template.ProtocolValidator : null);
 
 				return _protocolValidator;
 			}
 		}
 
-		public string RedirectUri
-		{
-			get { return _redirectUri; }
-		}
+		public string RedirectUri { get; private set; }
 
-		public string Resource
-		{
-			get { return _resource; }
-		}
+        public string Resource { get; private set; }
 
-		public string ResponseType
-		{
-			get { return _responseType; }
-		}
+        public string ResponseType { get; private set; }
 
-		public bool RefreshOnIssuerKeyNotFound
-		{
-			get { return _refreshOnIssuerKeyNotFound; }
-		}
+        public bool RefreshOnIssuerKeyNotFound { get; private set; }
 
-		public string SignInAsAuthenticationType
-		{
-			get { return _signInAsAuthenticationType; }
-		}
+        public string SignInAsAuthenticationType { get; private set; }
 
-		public string Scope
-		{
-			get { return _scope; }
-		}
+        public string Scope { get; private set; }
 
-		public bool UseTokenLifeTime
-		{
-			get { return _useTokenLifeTime; }
-		}
-		#endregion
+        public bool UseTokenLifeTime { get; private set; }
+        #endregion
 
-		#region Private Methods
-		private void SetKnownDefaults()
+        #region Private Methods
+        private void SetKnownDefaults()
 		{
 			if (!IdentityServerConfig.IsLoadKnownDefaults)
 				return;
@@ -621,15 +406,7 @@ namespace IdentityServer3.Contrib.Configuration
 	public class Configuration : IConfiguration
 	{
 		#region Fields
-		private string _authorizationEndpoint;
-		private string _checkSessionIframe;
-		private string _endSessionEndpoint;
-		private string _issuer;
 		private IJsonWebKeys _jsonWebKeys;
-		private string _jwksUri;
-		private string _tokenEndpoint;
-		private string _userInfoEndpoint;
-
 		private XPathNavigator _nav;
 		private IConfiguration _template = null;
 		#endregion
@@ -641,83 +418,48 @@ namespace IdentityServer3.Contrib.Configuration
 
 			_template = template;
 
-			if (_template != null)
-			{
-				_authorizationEndpoint = template.AuthorizationEndpoint;
-				_checkSessionIframe = template.CheckSessionIframe;
-				_endSessionEndpoint = template.EndSessionEndpoint;
-				_issuer = template.Issuer;
-				_jwksUri = template.JwksUri;
-				_tokenEndpoint = template.TokenEndpoint;
-				_userInfoEndpoint = template.UserInfoEndpoint;
-			}
-
-			var isMoveNext = iter.MoveNext();
+			iter.MoveNext();
 			_nav = iter.Current;
 
-			if (isMoveNext)
-			{
-				_nav.SetString("authorizationEndpoint", ref _authorizationEndpoint);
-				_nav.SetString("checkSessionIframe", ref _checkSessionIframe);
-				_nav.SetString("endSessionEndpoint", ref _endSessionEndpoint);
-				_nav.SetString("issuer", ref _issuer);
-				_nav.SetString("jwksUri", ref _jwksUri);
-				_nav.SetString("tokenEndpoint", ref _tokenEndpoint);
-				_nav.SetString("userInfoEndpoint", ref _userInfoEndpoint);
-			}
-		}
+            AuthorizationEndpoint = _nav.GetString(nameof(AuthorizationEndpoint), _template);
+            CheckSessionIframe = _nav.GetString(nameof(CheckSessionIframe), _template);
+            EndSessionEndpoint = _nav.GetString(nameof(EndSessionEndpoint), _template);
+            Issuer = _nav.GetString(nameof(Issuer), _template);
+            JwksUri = _nav.GetString(nameof(JwksUri), _template);
+            TokenEndpoint = _nav.GetString(nameof(TokenEndpoint), _template);
+            UserInfoEndpoint = _nav.GetString(nameof(UserInfoEndpoint), _template);
+        }
 		#endregion
 
 		#region Properties
-		public string AuthorizationEndpoint
-		{
-			get { return _authorizationEndpoint; }
-		}
+		public string AuthorizationEndpoint { get; private set; }
 
-		public string CheckSessionIframe
-		{
-			get { return _checkSessionIframe; }
-		}
+        public string CheckSessionIframe { get; private set; }
 
-		public string EndSessionEndpoint
-		{
-			get { return _endSessionEndpoint; }
-		}
+        public string EndSessionEndpoint { get; private set; }
 
-		public string Issuer
-		{
-			get { return _issuer; }
-		}
+        public string Issuer { get; private set; }
 
-		public IJsonWebKeys JsonWebKeys
+        public IJsonWebKeys JsonWebKeys
 		{
 			get
 			{
 				if (_jsonWebKeys == null)
-					_jsonWebKeys = new JsonWebKeys(_nav.Select("jsonWebKeys"), _template != null ? _template.JsonWebKeys : null);
+					_jsonWebKeys = new JsonWebKeys(_nav.Select(nameof(JsonWebKeys).ToLowerFirstLetter()), _template != null ? _template.JsonWebKeys : null);
 
 				return _jsonWebKeys;
 			}
 		}
 
-		public string JwksUri
-		{
-			get { return _jwksUri; }
-		}
+		public string JwksUri { get; private set; }
 
-		public string TokenEndpoint
-		{
-			get { return _tokenEndpoint; }
-		}
+        public string TokenEndpoint { get; private set; }
 
-		public string UserInfoEndpoint
-		{
-			get { return _userInfoEndpoint; }
-		}
-		#endregion
+        public string UserInfoEndpoint { get; private set; }
+        #endregion
 
-		#region Private Methods
-		private void SetKnownDefaults()
+        #region Private Methods
+        private void SetKnownDefaults()
 		{
 			if (!IdentityServerConfig.IsLoadKnownDefaults)
 				return;
@@ -741,7 +483,7 @@ namespace IdentityServer3.Contrib.Configuration
 		#region Private Methods
 		public void Initialize(XPathNodeIterator iter)
 		{
-			iter = iter.Current.Select("jsonWebKey");
+			iter = iter.Current.Select(nameof(JsonWebKey).ToLowerFirstLetter());
 
 			while (iter.MoveNext())
 			{
@@ -760,45 +502,26 @@ namespace IdentityServer3.Contrib.Configuration
 
 	public class JsonWebKey : IJsonWebKey
 	{
-		#region Fields
-		private string _id;
-		private string _value;
-		#endregion
-
 		#region Constructors
 		public JsonWebKey(XPathNodeIterator iter, IJsonWebKey template)
 		{
 			var nav = iter.Current;
 
-			if (template != null)
-			{
-				_id = template.Id;
-				_value = template.Value;
-			}
-
-			nav.SetString("id", ref _id);
-			nav.SetString("value", ref _value);
-		}
+			nav.GetString(nameof(Id), template);
+            nav.GetString(nameof(Value), template);
+        }
 		#endregion
 
 		#region Properties
-		public string Id
-		{
-			get { return _id; }
-		}
+		public string Id { get; private set; }
 
-		public string Value
-		{
-			get { return _value; }
-		}
-		#endregion
+        public string Value { get; private set; }
+        #endregion
 
-		#region Public Methods
-		public static string GetId(XPathNavigator nav)
+        #region Public Methods
+        public static string GetId(XPathNavigator nav)
 		{
-			var returnValue = string.Empty;
-			nav.SetString("id", ref returnValue);
-			return returnValue;
+            return nav.GetString(nameof(Id));
 		}
 		#endregion
 	}
@@ -806,15 +529,6 @@ namespace IdentityServer3.Contrib.Configuration
 	public class ProtocolValidator : IProtocolValidator
 	{
 		#region Fields
-		private TimeSpan _nonceLifetime;
-		private bool _requireAcr;
-		private bool _requireAmr;
-		private bool _requireAuthTime;
-		private bool _requireAzp;
-		private bool _requireNonce;
-		private bool _requireSub;
-		private bool _requireTimeStampInNonce;
-
 		private XPathNavigator _nav;
 		private IProtocolValidator _template = null;
 		#endregion
@@ -826,79 +540,40 @@ namespace IdentityServer3.Contrib.Configuration
 
 			_template = template;
 
-			if (_template != null)
-			{
-				_nonceLifetime = _template.NonceLifetime;
-				_requireAcr = _template.RequireAcr;
-				_requireAmr = _template.RequireAmr;
-				_requireAuthTime = _template.RequireAuthTime;
-				_requireAzp = _template.RequireAzp;
-				_requireNonce = _template.RequireNonce;
-				_requireSub = _template.RequireSub;
-				_requireTimeStampInNonce = _template.RequireTimeStampInNonce;
-			}
-
-			var isMoveNext = iter.MoveNext();
+			iter.MoveNext();
 			_nav = iter.Current;
 
-			if (isMoveNext)
-			{
-				_nav.SetTimeSpan("nonceLifetime", ref _nonceLifetime);
-				_nav.SetBool("requireAcr", ref _requireAcr);
-				_nav.SetBool("requireAmr", ref _requireAmr);
-				_nav.SetBool("requireAuthTime", ref _requireAuthTime);
-				_nav.SetBool("requireAzp", ref _requireAzp);
-				_nav.SetBool("requireNonce", ref _requireNonce);
-				_nav.SetBool("requireSub", ref _requireSub);
-				_nav.SetBool("requireTimeStampInNonce", ref _requireTimeStampInNonce);
-			}
-		}
+            NonceLifetime = _nav.GetTimeSpan(nameof(NonceLifetime), _template);
+            RequireAcr = _nav.GetBool(nameof(RequireAcr), _template);
+            RequireAmr = _nav.GetBool(nameof(RequireAmr), _template);
+            RequireAuthTime = _nav.GetBool(nameof(RequireAuthTime), _template);
+            RequireAzp = _nav.GetBool(nameof(RequireAzp), _template);
+            RequireNonce = _nav.GetBool(nameof(RequireNonce), _template);
+            RequireSub = _nav.GetBool(nameof(RequireSub), _template);
+            RequireTimeStampInNonce = _nav.GetBool(nameof(RequireTimeStampInNonce), _template);
+        }
 		#endregion
 
 		#region Properties
-		public TimeSpan NonceLifetime
-		{
-			get { return _nonceLifetime; }
-		}
+		public TimeSpan NonceLifetime { get; private set; }
 
-		public bool RequireAcr
-		{
-			get { return _requireAcr; }
-		}
+        public bool RequireAcr { get; private set; }
 
-		public bool RequireAmr
-		{
-			get { return _requireAmr; }
-		}
+        public bool RequireAmr { get; private set; }
 
-		public bool RequireAuthTime
-		{
-			get { return _requireAuthTime; }
-		}
+        public bool RequireAuthTime { get; private set; }
 
-		public bool RequireAzp
-		{
-			get { return _requireAzp; }
-		}
+        public bool RequireAzp { get; private set; }
 
-		public bool RequireNonce
-		{
-			get { return _requireNonce; }
-		}
+        public bool RequireNonce { get; private set; }
 
-		public bool RequireSub
-		{
-			get { return _requireSub; }
-		}
+        public bool RequireSub { get; private set; }
 
-		public bool RequireTimeStampInNonce
-		{
-			get { return _requireTimeStampInNonce; }
-		}
-		#endregion
+        public bool RequireTimeStampInNonce { get; private set; }
+        #endregion
 
-		#region Private Methods
-		private void SetKnownDefaults()
+        #region Private Methods
+        private void SetKnownDefaults()
 		{
 			if (!IdentityServerConfig.IsLoadKnownDefaults)
 				return;
@@ -909,22 +584,7 @@ namespace IdentityServer3.Contrib.Configuration
 	public class IdentityServerBearerTokenAuthenticationOptions : IIdentityServerBearerTokenAuthenticationOptions
 	{
 		#region Fields
-		private eAuthenticationMode? _authenticationMode;
-		private string _authenticationType;
-		private string _authority;
-		private string _clientId;
-		private string _clientSecret;
-		private bool? _delayLoadMetadata;
-		private bool? _enableValidationResultCache;
-		private string _issuerName;
-		private string _nameClaimType;
-		private bool? _preserveAccessToken;
-		private List<string> _requiredScopes;
-		private string _roleClaimType;
-		private eValidationMode? _validationMode;
-		private TimeSpan? _validationResultCacheDuration;
 		private IDescription _description;
-
 		private XPathNavigator _nav;
 		private IIdentityServerBearerTokenAuthenticationOptions _template = null;
 		#endregion
@@ -936,124 +596,61 @@ namespace IdentityServer3.Contrib.Configuration
 
 			_template = template;
 
-			if (_template != null)
-			{
-				_authenticationMode = _template.AuthenticationMode;
-				_authenticationType = _template.AuthenticationType;
-				_authority = _template.Authority;
-				_clientId = _template.ClientId;
-				_clientSecret = _template.ClientSecret;
-				_delayLoadMetadata = _template.DelayLoadMetadata;
-				_enableValidationResultCache = _template.EnableValidationResultCache;
-				_issuerName = _template.IssuerName;
-				_nameClaimType = _template.NameClaimType;
-				_preserveAccessToken = _template.PreserveAccessToken;
-				_requiredScopes = _template.RequiredScopes;
-				_roleClaimType = _template.RoleClaimType;
-				_validationMode = _template.ValidationMode;
-				_validationResultCacheDuration = _template.ValidationResultCacheDuration;
-			}
-
-			var isMoveNext = iter.MoveNext();
+			iter.MoveNext();
 			_nav = iter.Current;
 
-			if (isMoveNext)
-			{
-				_nav.SetEnumNullable("authenticationMode", ref _authenticationMode);
-				_nav.SetString("authenticationType", ref _authenticationType);
-				_nav.SetString("authority", ref _authority);
-				_nav.SetString("clientId", ref _clientId);
-				_nav.SetString("clientSecret", ref _clientSecret);
-				_nav.SetBoolNullable("delayLoadMetadata", ref _delayLoadMetadata);
-				_nav.SetBoolNullable("enableValidationResultCache", ref _enableValidationResultCache);
-				_nav.SetString("issuerName", ref _issuerName);
-				_nav.SetString("nameClaimType", ref _nameClaimType);
-				_nav.SetBoolNullable("preserveAccessToken", ref _preserveAccessToken);
-				_nav.SetListString("requiredScopes", ref _requiredScopes);
-				_nav.SetString("roleClaimType", ref _roleClaimType);
-				_nav.SetEnumNullable("validationMode", ref _validationMode);
-				_nav.SetTimeSpanNullable("validationResultCacheDuration", ref _validationResultCacheDuration);
-			}
-		}
+            AuthenticationMode = _nav.GetEnumNullable<eAuthenticationMode>(nameof(AuthenticationMode), _template);
+            AuthenticationType = _nav.GetString(nameof(AuthenticationType), _template);
+            Authority = _nav.GetString(nameof(Authority), _template);
+            ClientId = _nav.GetString(nameof(ClientId), _template);
+            ClientSecret = _nav.GetString(nameof(ClientSecret), _template);
+            DelayLoadMetadata = _nav.GetBoolNullable(nameof(DelayLoadMetadata), _template);
+            EnableValidationResultCache = _nav.GetBoolNullable(nameof(EnableValidationResultCache), _template);
+            IssuerName = _nav.GetString(nameof(IssuerName), _template);
+            NameClaimType = _nav.GetString(nameof(NameClaimType), _template);
+            PreserveAccessToken = _nav.GetBoolNullable(nameof(PreserveAccessToken), _template);
+            RequiredScopes = _nav.GetListString(nameof(RequiredScopes), _template);
+            RoleClaimType = _nav.GetString(nameof(RoleClaimType), _template);
+            ValidationMode = _nav.GetEnumNullable<eValidationMode>(nameof(ValidationMode), _template);
+            ValidationResultCacheDuration = _nav.GetTimeSpanNullable(nameof(ValidationResultCacheDuration), _template);
+        }
 		#endregion
 
 		#region Properties
-		public eAuthenticationMode? AuthenticationMode
-		{
-			get { return _authenticationMode; }
-		}
+		public eAuthenticationMode? AuthenticationMode { get; private set; }
 
-		public string AuthenticationType
-		{
-			get { return _authenticationType; }
-		}
+        public string AuthenticationType { get; private set; }
 
-		public string Authority
-		{
-			get { return _authority; }
-		}
+        public string Authority { get; private set; }
 
-		public string ClientId
-		{
-			get { return _clientId; }
-		}
+        public string ClientId { get; private set; }
 
-		public string ClientSecret
-		{
-			get { return _clientSecret; }
-		}
+        public string ClientSecret { get; private set; }
 
-		public bool? DelayLoadMetadata
-		{
-			get { return _delayLoadMetadata; }
-		}
+        public bool? DelayLoadMetadata { get; private set; }
 
-		public bool? EnableValidationResultCache
-		{
-			get { return _enableValidationResultCache; }
-		}
+        public bool? EnableValidationResultCache { get; private set; }
 
-		public string IssuerName
-		{
-			get { return _issuerName; }
-		}
+        public string IssuerName { get; private set; }
 
-		public string NameClaimType
-		{
-			get { return _nameClaimType; }
-		}
+        public string NameClaimType { get; private set; }
 
-		public bool? PreserveAccessToken
-		{
-			get { return _preserveAccessToken; }
-		}
+        public bool? PreserveAccessToken { get; private set; }
 
-		public List<string> RequiredScopes
-		{
-			get { return _requiredScopes; }
-		}
+        public List<string> RequiredScopes { get; private set; }
 
-		public string RoleClaimType
-		{
-			get { return _roleClaimType; }
-		}
+        public string RoleClaimType { get; private set; }
 
-		public eValidationMode? ValidationMode
-		{
-			get { return _validationMode; }
-		}
+        public eValidationMode? ValidationMode { get; private set; }
 
-		public TimeSpan? ValidationResultCacheDuration
-		{
-			get { return _validationResultCacheDuration; }
-		}
+        public TimeSpan? ValidationResultCacheDuration { get; private set; }
 
-		public IDescription Description
+        public IDescription Description
 		{
 			get
 			{
 				if (_description == null)
-					_description = new Description(_nav.Select("description"), _template != null ? _template.Description : null);
+					_description = new Description(_nav.Select(nameof(Description).ToLowerFirstLetter()), _template != null ? _template.Description : null);
 
 				return _description;
 			}
@@ -1066,15 +663,15 @@ namespace IdentityServer3.Contrib.Configuration
 			if (!IdentityServerConfig.IsLoadKnownDefaults)
 				return;
 
-			_authenticationMode = eAuthenticationMode.Active;
-			_authenticationType = "Bearer";
-			_delayLoadMetadata = false;
-			_enableValidationResultCache = false;
-			_nameClaimType = "name";
-			_preserveAccessToken = false;
-			_roleClaimType = "role";
-			_validationMode = eValidationMode.Both;
-			_validationResultCacheDuration = new TimeSpan(0, 5, 0);
+			AuthenticationMode = eAuthenticationMode.Active;
+			AuthenticationType = "Bearer";
+			DelayLoadMetadata = false;
+			EnableValidationResultCache = false;
+			NameClaimType = "name";
+			PreserveAccessToken = false;
+			RoleClaimType = "role";
+			ValidationMode = eValidationMode.Both;
+			ValidationResultCacheDuration = new TimeSpan(0, 5, 0);
 		}
 		#endregion
 	}
@@ -1104,37 +701,25 @@ namespace IdentityServer3.Contrib.Configuration
 				_scope = _template.Scope;
 			}
 
-			var isMoveNext = iter.MoveNext();
+			iter.MoveNext();
 			_nav = iter.Current;
 
-			if (isMoveNext)
-			{
-				_nav.SetString("clientId", ref _clientId);
-				_nav.SetString("secret", ref _secret);
-				_nav.SetString("scope", ref _scope);
-			}
-		}
+            ClientId = _nav.GetString(nameof(ClientId), _template);
+            Secret = _nav.GetString(nameof(Secret), _template);
+            Scope = _nav.GetString(nameof(Scope), _template);
+        }
 		#endregion
 
 		#region Properties
-		public string ClientId
-		{
-			get { return _clientId; }
-		}
+		public string ClientId { get; private set; }
 
-		public string Secret
-		{
-			get { return _secret; }
-		}
+        public string Secret { get; private set; }
 
-		public string Scope
-		{
-			get { return _scope; }
-		}
-		#endregion
+        public string Scope { get; private set; }
+        #endregion
 
-		#region Private Methods
-		private void SetKnownDefaults()
+        #region Private Methods
+        private void SetKnownDefaults()
 		{
 			if (!IdentityServerConfig.IsLoadKnownDefaults)
 				return;

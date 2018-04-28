@@ -4,320 +4,157 @@ using System.Linq;
 using System.Xml.XPath;
 
 using IdentityServer3.Contrib.Configuration.Enumeration;
+using IdentityServer3.Contrib.Configuration.Extension;
 using IdentityServer3.Contrib.Configuration.Interface;
 
 namespace IdentityServer3.Contrib.Configuration
 {
-	public class IdentityServerClientConfig : IIdentityServerClientConfig
-	{
-		#region Fields
-		private int? _absoluteRefreshTokenLifetime;
-		private int? _accessTokenLifetime;
-		private eAccessTokenType? _accessTokenType;
-		private bool? _allowAccessToAllCustomGrantTypes;
-		private bool? _allowAccessToAllScopes;
-		private bool? _allowClientCredentialsOnly;
-		private List<string> _allowedCorsOrigins;
-		private List<string> _allowedCustomGrantTypes;
-		private List<string> _allowedScopes;
-		private bool? _allowRememberConsent;
-		private bool? _alwaysSendClientClaims;
-		private int? _authorizationCodeLifetime;
-		private IClaims _claims;
-		private string _clientId;
-		private string _clientName;
-		private string _clientUri;
-		private bool? _enabled;
-		private bool? _enableLocalLogin;
-		private eFlows? _flow;
-		private List<string> _identityProviderRestrictions;
-		private int? _identityTokenLifetime;
-		private bool? _includeJwtId;
-		private string _logoUri;
-		private bool? _logoutSessionRequired;
-		private string _logoutUri;
-		private List<string> _postLogoutRedirectUris;
-		private bool? _prefixClientClaims;
-		private List<string> _redirectUris;
-		private eTokenExpiration? _refreshTokenExpiration;
-		private eTokenUsage? _refreshTokenUsage;
-		private bool? _requireConsent;
-		private ISecrets _secrets;
-		private int? _slidingRefreshTokenLifetime;
-		private bool? _updateAccessTokenClaimsOnRefresh;
+    public class IdentityServerClientConfig : IIdentityServerClientConfig
+    {
+        #region Fields
+        private IClaims _claims;
+        private ISecrets _secrets;
 
-		private XPathNavigator _nav;
-		private IIdentityServerClientConfig _template = null;
-		#endregion
+        private XPathNavigator _nav;
+        private IIdentityServerClientConfig _template = null;
+        #endregion
 
-		#region Constructors
-		public IdentityServerClientConfig(XPathNodeIterator iter, IIdentityServerClientConfig template)
-		{
-			SetKnownDefaults();
+        #region Constructors
+        public IdentityServerClientConfig(XPathNodeIterator iter, IIdentityServerClientConfig template)
+        {
+            SetKnownDefaults();
 
-			_template = template;
-			_nav = iter.Current;
+            _template = template;
+            _nav = iter.Current;
 
-			if (_template != null)
-			{
-				_absoluteRefreshTokenLifetime = _template.AbsoluteRefreshTokenLifetime;
-				_accessTokenLifetime = _template.AccessTokenLifetime;
-				_accessTokenType = _template.AccessTokenType;
-				_allowAccessToAllCustomGrantTypes = _template.AllowAccessToAllCustomGrantTypes;
-				_allowAccessToAllScopes = _template.AllowAccessToAllScopes;
-				_allowClientCredentialsOnly = _template.AllowClientCredentialsOnly;
-				_allowedCorsOrigins = _template.AllowedCorsOrigins;
-				_allowedCustomGrantTypes = _template.AllowedCustomGrantTypes;
-				_allowedScopes = _template.AllowedScopes;
-				_allowRememberConsent = _template.AllowRememberConsent;
-				_alwaysSendClientClaims = _template.AlwaysSendClientClaims;
-				_authorizationCodeLifetime = _template.AuthorizationCodeLifetime;
-				_clientId = _template.ClientId;
-				_clientName = _template.ClientName;
-				_clientUri = _template.ClientUri;
-				_enabled = _template.Enabled;
-				_enableLocalLogin = _template.EnableLocalLogin;
-				_flow = _template.Flow;
-				_identityProviderRestrictions = _template.IdentityProviderRestrictions;
-				_identityTokenLifetime = _template.IdentityTokenLifetime;
-				_includeJwtId = _template.IncludeJwtId;
-				_logoUri = _template.LogoUri;
-				_logoutSessionRequired = _template.LogoutSessionRequired;
-				_logoutUri = _template.LogoutUri;
-				_postLogoutRedirectUris = _template.PostLogoutRedirectUris;
-				_prefixClientClaims = _template.PrefixClientClaims;
-				_redirectUris = _template.RedirectUris;
-				_refreshTokenExpiration = _template.RefreshTokenExpiration;
-				_refreshTokenUsage = _template.RefreshTokenUsage;
-				_requireConsent = _template.RequireConsent;
-				_slidingRefreshTokenLifetime = _template.SlidingRefreshTokenLifetime;
-				_updateAccessTokenClaimsOnRefresh = _template.UpdateAccessTokenClaimsOnRefresh;
-			}
+            AbsoluteRefreshTokenLifetime = _nav.GetIntNullable(nameof(AbsoluteRefreshTokenLifetime), _template);
+            AccessTokenLifetime = _nav.GetIntNullable(nameof(AccessTokenLifetime), _template);
+            AccessTokenType = _nav.GetEnumNullable<eAccessTokenType>(nameof(AccessTokenType), _template);
+            AllowAccessToAllCustomGrantTypes = _nav.GetBoolNullable(nameof(AllowAccessToAllCustomGrantTypes), _template);
+            AllowAccessToAllScopes = _nav.GetBoolNullable(nameof(AllowAccessToAllScopes), _template);
+            AllowClientCredentialsOnly = _nav.GetBoolNullable(nameof(AllowClientCredentialsOnly), _template);
+            AllowedCorsOrigins = _nav.GetListString(nameof(AllowedCorsOrigins), _template);
+            AllowedCustomGrantTypes = _nav.GetListString(nameof(AllowedCustomGrantTypes), _template);
+            AllowedScopes = _nav.GetListString(nameof(AllowedScopes), _template);
+            AllowRememberConsent = _nav.GetBoolNullable(nameof(AllowRememberConsent), _template);
+            AlwaysSendClientClaims = _nav.GetBoolNullable(nameof(AlwaysSendClientClaims), _template);
+            AuthorizationCodeLifetime = _nav.GetIntNullable(nameof(AuthorizationCodeLifetime), _template);
+            ClientId = _nav.GetString(nameof(ClientId), _template);
+            ClientName = _nav.GetString(nameof(ClientName), _template);
+            ClientUri = _nav.GetString(nameof(ClientUri), _template);
+            Enabled = _nav.GetBoolNullable(nameof(Enabled), _template);
+            EnableLocalLogin = _nav.GetBoolNullable(nameof(EnableLocalLogin), _template);
+            Flow = _nav.GetEnumNullable<eFlows>(nameof(Flow), _template);
+            IdentityProviderRestrictions = _nav.GetListString(nameof(IdentityProviderRestrictions), _template);
+            IdentityTokenLifetime = _nav.GetIntNullable(nameof(IdentityTokenLifetime), _template);
+            IncludeJwtId = _nav.GetBoolNullable(nameof(IncludeJwtId), _template);
+            LogoUri = _nav.GetString(nameof(LogoUri), _template);
+            LogoutSessionRequired = _nav.GetBoolNullable(nameof(LogoutSessionRequired), _template);
+            LogoutUri = _nav.GetString(nameof(LogoutUri), _template);
+            PostLogoutRedirectUris = _nav.GetListString(nameof(PostLogoutRedirectUris), _template);
+            PrefixClientClaims = _nav.GetBoolNullable(nameof(PrefixClientClaims), _template);
+            RedirectUris = _nav.GetListString(nameof(RedirectUris), _template);
+            RefreshTokenExpiration = _nav.GetEnumNullable<eTokenExpiration>(nameof(RefreshTokenExpiration), _template);
+            RefreshTokenUsage = _nav.GetEnumNullable<eTokenUsage>(nameof(RefreshTokenUsage), _template);
+            RequireConsent = _nav.GetBoolNullable(nameof(RequireConsent), _template);
+            SlidingRefreshTokenLifetime = _nav.GetIntNullable(nameof(SlidingRefreshTokenLifetime), _template);
+            UpdateAccessTokenClaimsOnRefresh = _nav.GetBoolNullable(nameof(UpdateAccessTokenClaimsOnRefresh), _template);
+        }
+        #endregion
 
-			_nav.SetIntNullable("absoluteRefreshTokenLifetime", ref _absoluteRefreshTokenLifetime);
-			_nav.SetIntNullable("accessTokenLifetime", ref _accessTokenLifetime);
-			_nav.SetEnumNullable("accessTokenType", ref _accessTokenType);
-			_nav.SetBoolNullable("allowAccessToAllCustomGrantTypes", ref _allowAccessToAllCustomGrantTypes);
-			_nav.SetBoolNullable("allowAccessToAllScopes", ref _allowAccessToAllScopes);
-			_nav.SetBoolNullable("allowClientCredentialsOnly", ref _allowClientCredentialsOnly);
-			_nav.SetListString("allowedCorsOrigins", ref _allowedCorsOrigins);
-			_nav.SetListString("allowedCustomGrantTypes", ref _allowedCustomGrantTypes);
-			_nav.SetListString("allowedScopes", ref _allowedScopes);
-			_nav.SetBoolNullable("allowRememberConsent", ref _allowRememberConsent);
-			_nav.SetBoolNullable("alwaysSendClientClaims", ref _alwaysSendClientClaims);
-			_nav.SetIntNullable("authorizationCodeLifetime", ref _authorizationCodeLifetime);
-			_nav.SetString("clientId", ref _clientId);
-			_nav.SetString("clientName", ref _clientName);
-			_nav.SetString("clientUri", ref _clientUri);
-			_nav.SetBoolNullable("enabled", ref _enabled);
-			_nav.SetBoolNullable("enableLocalLogin", ref _enableLocalLogin);
-			_nav.SetEnumNullable("flow", ref _flow);
-			_nav.SetListString("identityProviderRestrictions", ref _identityProviderRestrictions);
-			_nav.SetIntNullable("identityTokenLifetime", ref _identityTokenLifetime);
-			_nav.SetBoolNullable("includeJwtId", ref _includeJwtId);
-			_nav.SetString("logoUri", ref _logoUri);
-			_nav.SetBoolNullable("logoutSessionRequired", ref _logoutSessionRequired);
-			_nav.SetString("logoutUri", ref _logoutUri);
-			_nav.SetListString("postLogoutRedirectUris", ref _postLogoutRedirectUris);
-			_nav.SetBoolNullable("prefixClientClaims", ref _prefixClientClaims);
-			_nav.SetListString("redirectUris", ref _redirectUris);
-			_nav.SetEnumNullable("refreshTokenExpiration", ref _refreshTokenExpiration);
-			_nav.SetEnumNullable("refreshTokenUsage", ref _refreshTokenUsage);
-			_nav.SetBoolNullable("requireConsent", ref _requireConsent);
-			_nav.SetIntNullable("slidingRefreshTokenLifetime", ref _slidingRefreshTokenLifetime);
-			_nav.SetBoolNullable("updateAccessTokenClaimsOnRefresh", ref _updateAccessTokenClaimsOnRefresh);
-		}
-		#endregion
+        #region Properties
+        public int? AbsoluteRefreshTokenLifetime { get; private set; }
 
-		#region Properties
-		public int? AbsoluteRefreshTokenLifetime
-		{
-			get { return _absoluteRefreshTokenLifetime; }
-		}
+		public int? AccessTokenLifetime { get; private set; }
 
-		public int? AccessTokenLifetime
-		{
-			get { return _accessTokenLifetime; }
-		}
+        public eAccessTokenType? AccessTokenType { get; private set; }
 
-		public eAccessTokenType? AccessTokenType
-		{
-			get { return _accessTokenType; }
-		}
+        public bool? AllowAccessToAllCustomGrantTypes { get; private set; }
 
-		public bool? AllowAccessToAllCustomGrantTypes
-		{
-			get { return _allowAccessToAllCustomGrantTypes; }
-		}
+        public bool? AllowAccessToAllScopes { get; private set; }
 
-		public bool? AllowAccessToAllScopes
-		{
-			get { return _allowAccessToAllScopes; }
-		}
+        public bool? AllowClientCredentialsOnly { get; private set; }
 
-		public bool? AllowClientCredentialsOnly
-		{
-			get { return _allowClientCredentialsOnly; }
-		}
+        public List<string> AllowedCorsOrigins { get; private set; }
 
-		public List<string> AllowedCorsOrigins
-		{
-			get { return _allowedCorsOrigins; }
-		}
+        public List<string> AllowedCustomGrantTypes { get; private set; }
 
-		public List<string> AllowedCustomGrantTypes
-		{
-			get { return _allowedCustomGrantTypes; }
-		}
+        public List<string> AllowedScopes { get; private set; }
 
-		public List<string> AllowedScopes
-		{
-			get { return _allowedScopes; }
-		}
+        public bool? AllowRememberConsent { get; private set; }
 
-		public bool? AllowRememberConsent
-		{
-			get { return _allowRememberConsent; }
-		}
+        public bool? AlwaysSendClientClaims { get; private set; }
 
-		public bool? AlwaysSendClientClaims
-		{
-			get { return _alwaysSendClientClaims; }
-		}
+        public int? AuthorizationCodeLifetime { get; private set; }
 
-		public int? AuthorizationCodeLifetime
-		{
-			get { return _authorizationCodeLifetime; }
-		}
-
-		public IClaims Claims
+        public IClaims Claims
 		{
 			get
 			{
 				if (_claims == null)
-					_claims = new Claims(_nav.Select("claims"), _template != null ? _template.Claims : null);
+					_claims = new Claims(_nav.Select(nameof(Claims).ToLowerFirstLetter()), _template != null ? _template.Claims : null);
 
 				return _claims;
 			}
 		}
 
-		public string ClientId
-		{
-			get { return _clientId; }
-		}
+		public string ClientId { get; private set; }
 
-		public string ClientName
-		{
-			get { return _clientName; }
-		}
+        public string ClientName { get; private set; }
 
-		public string ClientUri
-		{
-			get { return _clientUri; }
-		}
+        public string ClientUri { get; private set; }
 
-		public bool? Enabled
-		{
-			get { return _enabled; }
-		}
+        public bool? Enabled { get; private set; }
 
-		public bool? EnableLocalLogin
-		{
-			get { return _enableLocalLogin; }
-		}
+        public bool? EnableLocalLogin { get; private set; }
 
-		public eFlows? Flow
-		{
-			get { return _flow; }
-		}
+        public eFlows? Flow { get; private set; }
 
-		public List<string> IdentityProviderRestrictions
-		{
-			get { return _identityProviderRestrictions; }
-		}
+        public List<string> IdentityProviderRestrictions { get; private set; }
 
-		public int? IdentityTokenLifetime
-		{
-			get { return _identityTokenLifetime; }
-		}
+        public int? IdentityTokenLifetime { get; private set; }
 
-		public bool? IncludeJwtId
-		{
-			get { return _includeJwtId; }
-		}
+        public bool? IncludeJwtId { get; private set; }
 
-		public string LogoUri
-		{
-			get { return _logoUri; }
-		}
+        public string LogoUri { get; private set; }
 
-		public bool? LogoutSessionRequired
-		{
-			get { return _logoutSessionRequired; }
-		}
+        public bool? LogoutSessionRequired { get; private set; }
 
-		public string LogoutUri
-		{
-			get { return _logoutUri; }
-		}
+        public string LogoutUri { get; private set; }
 
-		public List<string> PostLogoutRedirectUris
-		{
-			get { return _postLogoutRedirectUris; }
-		}
+        public List<string> PostLogoutRedirectUris { get; private set; }
 
-		public bool? PrefixClientClaims
-		{
-			get { return _prefixClientClaims; }
-		}
+        public bool? PrefixClientClaims { get; private set; }
 
-		public List<string> RedirectUris
-		{
-			get { return _redirectUris; }
-		}
+        public List<string> RedirectUris { get; private set; }
 
-		public eTokenExpiration? RefreshTokenExpiration
-		{
-			get { return _refreshTokenExpiration; }
-		}
+        public eTokenExpiration? RefreshTokenExpiration { get; private set; }
 
-		public eTokenUsage? RefreshTokenUsage
-		{
-			get { return _refreshTokenUsage; }
-		}
+        public eTokenUsage? RefreshTokenUsage { get; private set; }
 
-		public bool? RequireConsent
-		{
-			get { return _requireConsent; }
-		}
+        public bool? RequireConsent { get; private set; }
 
-		public ISecrets Secrets
+        public ISecrets Secrets
 		{
 			get
 			{
 				if (_secrets == null)
-					_secrets = new Secrets(_nav.Select("secrets"), _template != null ? _template.Secrets : null);
+					_secrets = new Secrets(_nav.Select(nameof(Secrets).ToLowerFirstLetter()), _template != null ? _template.Secrets : null);
 
 				return _secrets;
 			}
 		}
 
-		public int? SlidingRefreshTokenLifetime
-		{
-			get { return _slidingRefreshTokenLifetime; }
-		}
+		public int? SlidingRefreshTokenLifetime { get; private set; }
 
-		public bool? UpdateAccessTokenClaimsOnRefresh
-		{
-			get { return _updateAccessTokenClaimsOnRefresh; }
-		}
-		#endregion
+        public bool? UpdateAccessTokenClaimsOnRefresh { get; private set; }
+        #endregion
 
-		#region Public Methods
-		public static string GetClientId(XPathNavigator nav)
+        #region Public Methods
+        public static string GetClientId(XPathNavigator nav)
 		{
 			var returnValue = string.Empty;
-			nav.SetString("clientId", ref returnValue);
+			nav.GetString(nameof(ClientId));
 			return returnValue;
 		}
 		#endregion
@@ -328,27 +165,27 @@ namespace IdentityServer3.Contrib.Configuration
 			if (!IdentityServerConfig.IsLoadKnownDefaults)
 				return;
 
-			_absoluteRefreshTokenLifetime = 2592000;
-			_accessTokenLifetime = 3600;
-			_accessTokenType = eAccessTokenType.Jwt;
-			_allowAccessToAllCustomGrantTypes = false;
-			_allowAccessToAllScopes = false;
-			_allowClientCredentialsOnly = false;
-			_allowRememberConsent = true;
-			_alwaysSendClientClaims = false;
-			_authorizationCodeLifetime = 300;
-			_enabled = true;
-			_enableLocalLogin = true;
-			_flow = eFlows.Implicit;
-			_identityTokenLifetime = 300;
-			_includeJwtId = false;
-			_logoutSessionRequired = true;
-			_prefixClientClaims = true;
-			_refreshTokenExpiration = eTokenExpiration.Absolute;
-			_refreshTokenUsage = eTokenUsage.OneTimeOnly;
-			_requireConsent = true;
-			_slidingRefreshTokenLifetime = 1296000;
-			_updateAccessTokenClaimsOnRefresh = false;
+			AbsoluteRefreshTokenLifetime = 2592000;
+			AccessTokenLifetime = 3600;
+			AccessTokenType = eAccessTokenType.Jwt;
+			AllowAccessToAllCustomGrantTypes = false;
+			AllowAccessToAllScopes = false;
+			AllowClientCredentialsOnly = false;
+			AllowRememberConsent = true;
+			AlwaysSendClientClaims = false;
+			AuthorizationCodeLifetime = 300;
+			Enabled = true;
+			EnableLocalLogin = true;
+			Flow = eFlows.Implicit;
+			IdentityTokenLifetime = 300;
+			IncludeJwtId = false;
+			LogoutSessionRequired = true;
+			PrefixClientClaims = true;
+			RefreshTokenExpiration = eTokenExpiration.Absolute;
+			RefreshTokenUsage = eTokenUsage.OneTimeOnly;
+			RequireConsent = true;
+			SlidingRefreshTokenLifetime = 1296000;
+			UpdateAccessTokenClaimsOnRefresh = false;
 		}
 		#endregion
 	}
@@ -369,7 +206,7 @@ namespace IdentityServer3.Contrib.Configuration
 		#region Private Methods
 		public void Initialize(XPathNodeIterator iter)
 		{
-			iter = iter.Current.Select("claim");
+			iter = iter.Current.Select(nameof(Claim).ToLowerFirstLetter());
 
 			while (iter.MoveNext())
 			{
@@ -388,76 +225,41 @@ namespace IdentityServer3.Contrib.Configuration
 
 	public class Claim : IClaim
 	{
-		#region Fields
-		private string _value;
-		private string _type;
-		private string _valueType;
-		private string _issuer;
-		private string _originalIssuer;
-		private IClaimsIdentity _subject;
-		#endregion
-
 		#region Constructors
 		public Claim(XPathNodeIterator iter, IClaim template)
 		{
 			var nav = iter.Current;
 
-			if (template != null)
-			{
-				_value = template.Value;
-				_type = template.Type;
-				_valueType = template.ValueType;
-				_issuer = template.Issuer;
-				_originalIssuer = template.OriginalIssuer;
-			}
-
-			nav.SetString("value", ref _value);
-			nav.SetString("type", ref _type);
-			nav.SetString("valueType", ref _valueType);
-			nav.SetString("issuer", ref _issuer);
-			nav.SetString("originalIssuer", ref _originalIssuer);
-		}
+            Value = nav.GetString(nameof(Value), template);
+            Type = nav.GetString(nameof(Type), template);
+            ValueType = nav.GetString(nameof(ValueType), template);
+            Issuer = nav.GetString(nameof(Issuer), template);
+            OriginalIssuer = nav.GetString(nameof(OriginalIssuer), template);
+        }
 		#endregion
 
 		#region Properties
-		public string Value
-		{
-			get { return _value; }
-		}
+		public string Value { get; private set; }
 
-		public string Type
-		{
-			get { return _type; }
-		}
+		public string Type { get; private set; }
 
-		public string ValueType
-		{
-			get { return _valueType; }
-		}
+        public string ValueType { get; private set; }
 
-		public string Issuer
-		{
-			get { return _issuer; }
-		}
+        public string Issuer { get; private set; }
 
-		public string OriginalIssuer
-		{
-			get { return _originalIssuer; }
-		}
+        public string OriginalIssuer { get; private set; }
 
-		public IClaimsIdentity Subject
+        public IClaimsIdentity Subject
 		{
-			get { return _subject; }
+			get { throw new NotImplementedException(); }
 		}
 		#endregion
 
 		#region Public Methods
 		public static string GetValue(XPathNavigator nav)
 		{
-			var returnValue = string.Empty;
-			nav.SetString("value", ref returnValue);
-			return returnValue;
-		}
+            return nav.GetString(nameof(Value));
+        }
 		#endregion
 	}
 
@@ -477,7 +279,7 @@ namespace IdentityServer3.Contrib.Configuration
 		#region Private Methods
 		public void Initialize(XPathNodeIterator iter)
 		{
-			iter = iter.Current.Select("secret");
+			iter = iter.Current.Select(nameof(Secret).ToLowerFirstLetter());
 
 			while (iter.MoveNext())
 			{
@@ -496,62 +298,33 @@ namespace IdentityServer3.Contrib.Configuration
 
 	public class Secret : ISecret
 	{
-		#region Fields
-		private string _value;
-		private string _type;
-		private string _description;
-		private DateTimeOffset? _expiration;
-		#endregion
-
 		#region Constructors
 		public Secret(XPathNodeIterator iter, ISecret template)
 		{
 			var nav = iter.Current;
 
-			if (template != null)
-			{
-				_value = template.Value;
-				_type = template.Type;
-				_description = template.Description;
-				_expiration = template.Expiration;
-			}
-
-			nav.SetString("value", ref _value);
-			nav.SetString("type", ref _type);
-			nav.SetString("description", ref _description);
-			nav.SetDateTimeOffsetNullable("expiration", ref _expiration);
+            Value = nav.GetString(nameof(Value), template);
+            Type = nav.GetString(nameof(Type), template);
+            Description = nav.GetString(nameof(Description), template);
+            Expiration = nav.GetDateTimeOffsetNullable(nameof(Expiration), template);
 		}
 		#endregion
 
 		#region Properties
-		public string Value
-		{
-			get { return _value; }
-		}
+		public string Value { get; private set; }
 
-		public string Type
-		{
-			get { return _type; }
-		}
+        public string Type { get; private set; }
 
-		public string Description
-		{
-			get { return _description; }
-		}
+        public string Description { get; private set; }
 
-		public DateTimeOffset? Expiration
-		{
-			get { return _expiration; }
-		}
+        public DateTimeOffset? Expiration { get; private set; }
 
-		#endregion
+        #endregion
 
-		#region Public Methods
-		public static string GetValue(XPathNavigator nav)
+        #region Public Methods
+        public static string GetValue(XPathNavigator nav)
 		{
-			var returnValue = string.Empty;
-			nav.SetString("value", ref returnValue);
-			return returnValue;
+			return nav.GetString(nameof(Value));
 		}
 		#endregion
 	}

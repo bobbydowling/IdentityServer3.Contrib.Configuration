@@ -101,7 +101,7 @@ namespace IdentityServer3.Contrib.Configuration.Test
 		[TestCategory("Unit - Security - Configuration - IdentityServer - Scopes")]
 		public void GetScopeType()
 		{
-			Assert.AreEqual(eScopeType.Identity, CompanySecurityConfig.Current.IdentityServer.Server.Scopes[5].ScopeType.Value);
+			Assert.AreEqual(eScopeType.Identity, CompanySecurityConfig.Current.IdentityServer.Server.Scopes[5].Type.Value);
 		}
 		#endregion
 

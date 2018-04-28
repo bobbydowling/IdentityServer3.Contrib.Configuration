@@ -28,7 +28,7 @@ namespace IdentityServer3.Contrib.Configuration.Interface
 
 		bool? ShowInDiscoveryDocument { get; }
 
-		eScopeType? ScopeType { get; }
+		eScopeType? Type { get; }
 		#endregion
 	}
 

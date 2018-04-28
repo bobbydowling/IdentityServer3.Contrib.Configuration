@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/source/.vs/IdentityServer3.Contrib.Configuration/v15/Server/sqlite3
+/source/.vs/IdentityServer3.Contrib.Configuration/v15
+/source/IdentityServer3.Contrib.Configuration/bin/Debug
+/source/IdentityServer3.Contrib.Configuration/obj/Debug
+/source/IdentityServer3.Contrib.Configuration.Test/bin/Debug
+/source/IdentityServer3.Contrib.Configuration.Test/obj/Debug
