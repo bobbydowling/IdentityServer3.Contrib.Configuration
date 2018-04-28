@@ -3,6 +3,7 @@ using System.Configuration;
 using System.IO;
 using System.Xml;
 
+using IdentityServer3.Contrib.Configuration.Extension;
 using IdentityServer3.Contrib.Configuration.Interface;
 
 namespace IdentityServer3.Contrib.Configuration
@@ -31,7 +32,7 @@ namespace IdentityServer3.Contrib.Configuration
 				if (_config != null)
 					return _config;
 
-				var config = (CompanySecurityConfigData)ConfigurationManager.GetSection("security");
+				var config = (CompanySecurityConfigData)ConfigurationManager.GetSection(nameof(Security).ToLowerFirstLetter());
 
 				if (config == null)
 				{

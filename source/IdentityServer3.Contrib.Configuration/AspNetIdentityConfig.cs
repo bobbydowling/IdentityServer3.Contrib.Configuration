@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml.XPath;
 
+using IdentityServer3.Contrib.Configuration.Extension;
 using IdentityServer3.Contrib.Configuration.Interface;
 
 namespace IdentityServer3.Contrib.Configuration
@@ -33,7 +34,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_password == null)
-					_password = new Password(GetChild(_nav, "password"), _template != null ? _template.Password : null);
+					_password = new Password(GetChild(_nav, nameof(Password).ToLowerFirstLetter()), _template != null ? _template.Password : null);
 
 				return _password;
 			}
@@ -44,7 +45,7 @@ namespace IdentityServer3.Contrib.Configuration
 			get
 			{
 				if (_userManager == null)
-					_userManager = new UserManager(GetChild(_nav, "userManager"), _template != null ? _template.UserManager : null);
+					_userManager = new UserManager(GetChild(_nav, nameof(UserManager).ToLowerFirstLetter()), _template != null ? _template.UserManager : null);
 
 				return _userManager;
 			}
@@ -66,7 +67,7 @@ namespace IdentityServer3.Contrib.Configuration
 		#region Private Methods
 		private void SetIsLoadKnownDefaults(XPathNavigator nav)
 		{
-			var value = nav.GetAttribute("isLoadKnownDefaults", string.Empty);
+			var value = nav.GetAttribute(nameof(IsLoadKnownDefaults).ToLowerFirstLetter(), string.Empty);
 
 			if (value.HasValue())
 				IsLoadKnownDefaults = bool.Parse(value);
@@ -77,12 +78,6 @@ namespace IdentityServer3.Contrib.Configuration
 	public class Password : IPassword
 	{
 		#region Fields
-		private int _requiredLength;
-		private string _matchPattern;
-		private string _matchPatternMessage;
-		private int _historyLimit;
-		private int _expiryDays;
-
 		private XPathNavigator _nav;
 		private IPassword _template = null;
 		#endregion
@@ -93,61 +88,31 @@ namespace IdentityServer3.Contrib.Configuration
 			_template = template;
 			_nav = nav;
 
-			if (_template != null)
-			{
-				_requiredLength = _template.RequiredLength;
-				_matchPattern = _template.MatchPattern;
-				_matchPatternMessage = _template.MatchPatternMessage;
-				_historyLimit = _template.HistoryLimit;
-				_expiryDays = _template.ExpiryDays;
-			}
-
-			_nav.SetInt("requiredLength", ref _requiredLength);
-			_nav.SetString("matchPattern", ref _matchPattern);
-			_nav.SetString("matchPatternMessage", ref _matchPatternMessage);
-			_nav.SetInt("historyLimit", ref _historyLimit);
-			_nav.SetInt("expiryDays", ref _expiryDays);
+            RequiredLength = _nav.GetInt(nameof(RequiredLength), _template);
+            MatchPattern = _nav.GetString(nameof(MatchPattern), _template);
+            MatchPatternMessage = _nav.GetString(nameof(MatchPatternMessage), _template);
+            HistoryLimit = _nav.GetInt(nameof(HistoryLimit), _template);
+            ExpiryDays = _nav.GetInt(nameof(ExpiryDays), _template);
 		}
 		#endregion
 
 		#region Properties
-		public int RequiredLength
-		{
-			get { return _requiredLength; }
-		}
+		public int RequiredLength { get; private set; }
 
-		public string MatchPattern
-		{
-			get { return _matchPattern; }
-		}
+		public string MatchPattern { get; private set; }
 
-		public string MatchPatternMessage
-		{
-			get { return _matchPatternMessage; }
-		}
+        public string MatchPatternMessage { get; private set; }
 
-		public int HistoryLimit
-		{
-			get { return _historyLimit; }
-		}
+        public int HistoryLimit { get; private set; }
 
-		public int ExpiryDays
-		{
-			get { return _expiryDays; }
-		}
-
-		#endregion
-	}
+        public int ExpiryDays { get; private set; }
+        #endregion
+    }
 
 	public class UserManager : IUserManager
 	{
 		#region Fields
-		private bool? _isUserLockoutEnabledByDefault;
-		private TimeSpan? _defaultAccountLockoutTimeSpan;
-		private int? _maxFailedAccessAttemptsBeforeLockout;
 		private ISupportedFields _supportedFields;
-		private TimeSpan _tokenProviderTokenExpiration;
-
 		private XPathNavigator _nav;
 		private IUserManager _template = null;
 		#endregion
@@ -158,66 +123,47 @@ namespace IdentityServer3.Contrib.Configuration
 			SetKnownDefaults();
 
 			_template = template;
+            _nav = nav;
 
-			if (_template != null)
-			{
-				_isUserLockoutEnabledByDefault = template.IsUserLockoutEnabledByDefault;
-				_defaultAccountLockoutTimeSpan = template.DefaultAccountLockoutTimeSpan;
-				_maxFailedAccessAttemptsBeforeLockout = template.MaxFailedAccessAttemptsBeforeLockout;
-				_tokenProviderTokenExpiration = template.TokenProviderTokenExpiration;
-			}
-
-			nav.SetBoolNullable("isUserLockoutEnabledByDefault", ref _isUserLockoutEnabledByDefault);
-			nav.SetTimeSpanNullable("defaultAccountLockoutTimeSpan", ref _defaultAccountLockoutTimeSpan);
-			nav.SetIntNullable("maxFailedAccessAttemptsBeforeLockout", ref _maxFailedAccessAttemptsBeforeLockout);
-			nav.SetTimeSpan("tokenProviderTokenExpiration", ref _tokenProviderTokenExpiration);
+            IsUserLockoutEnabledByDefault = _nav.GetBoolNullable(nameof(IsUserLockoutEnabledByDefault), _template);
+            DefaultAccountLockoutTimeSpan = _nav.GetTimeSpanNullable(nameof(DefaultAccountLockoutTimeSpan), _template);
+            MaxFailedAccessAttemptsBeforeLockout = _nav.GetIntNullable(nameof(MaxFailedAccessAttemptsBeforeLockout), _template);
+            TokenProviderTokenExpiration = _nav.GetTimeSpan(nameof(TokenProviderTokenExpiration), _template);
 
 			_nav = nav;
 		}
 		#endregion
 
 		#region Properties
-		public bool? IsUserLockoutEnabledByDefault
-		{
-			get { return _isUserLockoutEnabledByDefault; }
-		}
+		public bool? IsUserLockoutEnabledByDefault { get; private set; }
 
-		public TimeSpan? DefaultAccountLockoutTimeSpan
-		{
-			get { return _defaultAccountLockoutTimeSpan; }
-		}
+        public TimeSpan? DefaultAccountLockoutTimeSpan { get; private set; }
 
-		public int? MaxFailedAccessAttemptsBeforeLockout
-		{
-			get { return _maxFailedAccessAttemptsBeforeLockout; }
-		}
+        public int? MaxFailedAccessAttemptsBeforeLockout { get; private set; }
 
-		public ISupportedFields SupportedFields
+        public ISupportedFields SupportedFields
 		{
 			get
 			{
 				if (_supportedFields == null)
-					_supportedFields = new SupportedFields(_nav.Select("supportedFields"), _template != null ? _template.SupportedFields : null);
+					_supportedFields = new SupportedFields(_nav.Select(nameof(SupportedFields).ToLowerFirstLetter()), _template != null ? _template.SupportedFields : null);
 
 				return _supportedFields;
 			}
 		}
 
-		public TimeSpan TokenProviderTokenExpiration
-		{
-			get { return _tokenProviderTokenExpiration; }
-		}
-		#endregion
+		public TimeSpan TokenProviderTokenExpiration { get; private set; }
+        #endregion
 
-		#region Private Methods
-		private void SetKnownDefaults()
+        #region Private Methods
+        private void SetKnownDefaults()
 		{
 			if (!IdentityServerConfig.IsLoadKnownDefaults)
 				return;
 
-			_isUserLockoutEnabledByDefault = true;
-			_defaultAccountLockoutTimeSpan = new TimeSpan(0, 10, 0);
-			_maxFailedAccessAttemptsBeforeLockout = 3;
+			IsUserLockoutEnabledByDefault = true;
+			DefaultAccountLockoutTimeSpan = new TimeSpan(0, 10, 0);
+			MaxFailedAccessAttemptsBeforeLockout = 3;
 		}
 		#endregion
 	}
@@ -225,17 +171,6 @@ namespace IdentityServer3.Contrib.Configuration
 	public class SupportedFields : ISupportedFields
 	{
 		#region Fields
-		private bool? _isSupportsQueryableUsers;
-		private bool? _isSupportsUserClaim;
-		private bool? _isSupportsUserEmail;
-		private bool? _isSupportsUserLockout;
-		private bool? _isSupportsUserLogin;
-		private bool? _isSupportsUserPassword;
-		private bool? _isSupportsUserPhoneNumber;
-		private bool? _isSupportsUserRole;
-		private bool? _isSupportsUserSecurityStamp;
-		private bool? _isSupportsUserTwoFactor;
-
 		private XPathNavigator _nav;
 		private ISupportedFields _template = null;
 		#endregion
@@ -247,107 +182,60 @@ namespace IdentityServer3.Contrib.Configuration
 
 			_template = template;
 
-			if (_template != null)
-			{
-				_isSupportsQueryableUsers = _template.IsSupportsQueryableUsers;
-				_isSupportsUserClaim = _template.IsSupportsUserClaim;
-				_isSupportsUserEmail = _template.IsSupportsUserEmail;
-				_isSupportsUserLockout = _template.IsSupportsUserLockout;
-				_isSupportsUserLogin = _template.IsSupportsUserLogin;
-				_isSupportsUserPassword = _template.IsSupportsUserPassword;
-				_isSupportsUserPhoneNumber = _template.IsSupportsUserPhoneNumber;
-				_isSupportsUserRole = _template.IsSupportsUserRole;
-				_isSupportsUserSecurityStamp = _template.IsSupportsUserSecurityStamp;
-				_isSupportsUserTwoFactor = _template.IsSupportsUserTwoFactor;
-			}
-
-			var isMoveNext = iter.MoveNext();
+			iter.MoveNext();
 			_nav = iter.Current;
 
-			if (isMoveNext)
-			{
-				_nav.SetBoolNullable("isSupportsQueryableUsers", ref _isSupportsQueryableUsers);
-				_nav.SetBoolNullable("isSupportsUserClaim", ref _isSupportsUserClaim);
-				_nav.SetBoolNullable("isSupportsUserEmail", ref _isSupportsUserEmail);
-				_nav.SetBoolNullable("isSupportsUserLockout", ref _isSupportsUserLockout);
-				_nav.SetBoolNullable("isSupportsUserLogin", ref _isSupportsUserLogin);
-				_nav.SetBoolNullable("isSupportsUserPassword", ref _isSupportsUserPassword);
-				_nav.SetBoolNullable("isSupportsUserPhoneNumber", ref _isSupportsUserPhoneNumber);
-				_nav.SetBoolNullable("isSupportsUserRole", ref _isSupportsUserRole);
-				_nav.SetBoolNullable("isSupportsUserSecurityStamp", ref _isSupportsUserSecurityStamp);
-				_nav.SetBoolNullable("isSupportsUserTwoFactor", ref _isSupportsUserTwoFactor);
-			}
-		}
+            IsSupportsQueryableUsers = _nav.GetBoolNullable(nameof(IsSupportsQueryableUsers), _template);
+            IsSupportsUserClaim = _nav.GetBoolNullable(nameof(IsSupportsUserClaim), _template);
+            IsSupportsUserEmail = _nav.GetBoolNullable(nameof(IsSupportsUserEmail), _template);
+            IsSupportsUserLockout = _nav.GetBoolNullable(nameof(IsSupportsUserLockout), _template);
+            IsSupportsUserLogin = _nav.GetBoolNullable(nameof(IsSupportsUserLogin), _template);
+            IsSupportsUserPassword = _nav.GetBoolNullable(nameof(IsSupportsUserPassword), _template);
+            IsSupportsUserPhoneNumber = _nav.GetBoolNullable(nameof(IsSupportsUserPhoneNumber), _template);
+            IsSupportsUserRole = _nav.GetBoolNullable(nameof(IsSupportsUserRole), _template);
+            IsSupportsUserSecurityStamp = _nav.GetBoolNullable(nameof(IsSupportsUserSecurityStamp), _template);
+            IsSupportsUserTwoFactor = _nav.GetBoolNullable(nameof(IsSupportsUserTwoFactor), _template);
+        }
 		#endregion
 
 		#region Properties
-		public bool? IsSupportsQueryableUsers
-		{
-			get { return _isSupportsQueryableUsers; }
-		}
+		public bool? IsSupportsQueryableUsers { get; private set; }
 
-		public bool? IsSupportsUserClaim
-		{
-			get { return _isSupportsUserClaim; }
-		}
+		public bool? IsSupportsUserClaim { get; private set; }
 
-		public bool? IsSupportsUserEmail
-		{
-			get { return _isSupportsUserEmail; }
-		}
+        public bool? IsSupportsUserEmail { get; private set; }
 
-		public bool? IsSupportsUserLockout
-		{
-			get { return _isSupportsUserLockout; }
-		}
+        public bool? IsSupportsUserLockout { get; private set; }
 
-		public bool? IsSupportsUserLogin
-		{
-			get { return _isSupportsUserLogin; }
-		}
+        public bool? IsSupportsUserLogin { get; private set; }
 
-		public bool? IsSupportsUserPassword
-		{
-			get { return _isSupportsUserPassword; }
-		}
+        public bool? IsSupportsUserPassword { get; private set; }
 
-		public bool? IsSupportsUserPhoneNumber
-		{
-			get { return _isSupportsUserPhoneNumber; }
-		}
+        public bool? IsSupportsUserPhoneNumber { get; private set; }
 
-		public bool? IsSupportsUserRole
-		{
-			get { return _isSupportsUserRole; }
-		}
+        public bool? IsSupportsUserRole { get; private set; }
 
-		public bool? IsSupportsUserSecurityStamp
-		{
-			get { return _isSupportsUserSecurityStamp; }
-		}
+        public bool? IsSupportsUserSecurityStamp { get; private set; }
 
-		public bool? IsSupportsUserTwoFactor
-		{
-			get { return _isSupportsUserTwoFactor; }
-		}
-		#endregion
+        public bool? IsSupportsUserTwoFactor { get; private set; }
+        #endregion
 
-		#region Private Methods
-		private void SetKnownDefaults()
+        #region Private Methods
+        private void SetKnownDefaults()
 		{
 			if (!IdentityServerConfig.IsLoadKnownDefaults)
 				return;
 
-			_isSupportsQueryableUsers = true;
-			_isSupportsUserClaim = true;
-			_isSupportsUserEmail = true;
-			_isSupportsUserLockout = true;
-			_isSupportsUserLogin = true;
-			_isSupportsUserPassword = true;
-			_isSupportsUserPhoneNumber = true;
-			_isSupportsUserRole = true;
-			_isSupportsUserSecurityStamp = true;
-			_isSupportsUserTwoFactor = true;
+			IsSupportsQueryableUsers = true;
+			IsSupportsUserClaim = true;
+			IsSupportsUserEmail = true;
+			IsSupportsUserLockout = true;
+			IsSupportsUserLogin = true;
+			IsSupportsUserPassword = true;
+			IsSupportsUserPhoneNumber = true;
+			IsSupportsUserRole = true;
+			IsSupportsUserSecurityStamp = true;
+			IsSupportsUserTwoFactor = true;
 		}
 		#endregion
 	}

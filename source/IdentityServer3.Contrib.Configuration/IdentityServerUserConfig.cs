@@ -1,4 +1,6 @@
 ﻿using System.Xml.XPath;
+
+using IdentityServer3.Contrib.Configuration.Extension;
 using IdentityServer3.Contrib.Configuration.Interface;
 
 namespace IdentityServer3.Contrib.Configuration
@@ -27,9 +29,7 @@ namespace IdentityServer3.Contrib.Configuration
 		#region Public Methods
 		public static string GetName(XPathNavigator nav)
 		{
-			var returnValue = string.Empty;
-			nav.SetString("name", ref returnValue);
-			return returnValue;
+            return nav.GetString(nameof(Name));
 		}
 		#endregion
 	}
