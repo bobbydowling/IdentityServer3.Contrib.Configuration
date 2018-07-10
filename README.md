@@ -20,14 +20,14 @@ Next, configure your app/web config file.
 * Register the handler:
 ```xml
 <configSections>
-		<section name="security" type="IdentityServer3.Contrib.Configuration.ConfigSectionHandler,IdentityServer3.Contrib.Configuration" allowLocation="false"/>
+	<section name="security" type="IdentityServer3.Contrib.Configuration.ConfigSectionHandler,IdentityServer3.Contrib.Configuration" allowLocation="false"/>
 </configSections>
 ```
 
 * Add the following appSettings key:
 ```xml
 <appSettings>
-		<add key="ConfigFilePath" value=""/>
+	<add key="ConfigFilePath" value=""/>
 </appSettings>
 ```
 
